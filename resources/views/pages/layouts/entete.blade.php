@@ -74,6 +74,10 @@
                         <i class="fas fa-box w-5"></i>
                         <span>Produits</span>
                     </a>
+                    <a href="{{ route('parametres')}}" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-200">
+                        <i class="fas fa-cog w-5"></i>
+                        <span>Paramètres</span>
+                    </a>
                     
                     <a href="#" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-200">
                         <i class="fas fa-shopping-cart w-5"></i>
@@ -89,7 +93,7 @@
                         <h3 class="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Système</h3>
                     </div>
                     
-                    <a href="#" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-200">
+                    <a href="{{ route('parametres')}}" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-200">
                         <i class="fas fa-cog w-5"></i>
                         <span>Paramètres</span>
                     </a>
@@ -165,7 +169,7 @@
                 <i class="fas fa-user-circle w-5 mr-3 text-gray-400"></i>
                 Mon profil
             </a>
-            <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
+            <a href="{{ route('parametres')}}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
                 <i class="fas fa-cog w-5 mr-3 text-gray-400"></i>
                 Paramètres
             </a>

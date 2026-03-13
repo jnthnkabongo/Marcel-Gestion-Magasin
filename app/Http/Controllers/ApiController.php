@@ -12,6 +12,17 @@ use App\Models\Produit;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use App\Models\Marque;
+use App\Models\Approvisionnement;
+use App\Models\Categorie;
+use App\Models\Fournisseur;
+use App\Models\Role;
+use App\Models\Client;
+use App\Models\ProduitUnite;
+use App\Models\Vente;
+use App\Models\VenteDetail;
+use App\Models\Garantie;
+use App\Models\Paiement;
+use App\Models\ApprovisionnementDetail;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 
@@ -193,6 +204,13 @@ class ApiController extends Controller
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Erreur lors de la création de la catégorie: ' . $e->getMessage());
         }
+    }
+
+    public function parametres()
+    {
+        $marques = Marque::all();
+        $categories = Categorie::all();
+        return view('pages.parametres', compact('marques', 'categories'));
     }
 
     /**
