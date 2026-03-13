@@ -169,8 +169,12 @@
                                     </td>
                                    
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <a href="#" class="text-indigo-600 hover:text-indigo-900 mr-3">Voir</a>
-                                        <a href="#" class="text-gray-600 hover:text-gray-900 mr-3">Modifier</a>
+                                        <button class="text-blue-600 hover:text-blue-700 mr-2">
+                                            <i class="fas fa-edit text-2xl"></i>
+                                        </button>
+                                        <button class="text-red-600 hover:text-red-700">
+                                            <i class="fas fa-trash text-2xl"></i>
+                                        </button>
                                         {{-- <form action="{{ route('users.destroy', $user->id) }}" method="POST" style="display: inline;">
                                             @csrf
                                             @method('DELETE')
