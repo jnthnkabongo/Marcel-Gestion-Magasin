@@ -8,9 +8,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Historique;
 use App\Models\HistoriqueAction;
+use App\Models\Produit;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
+use App\Models\Marque;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 class ApiController extends Controller
 {
@@ -105,6 +108,11 @@ class ApiController extends Controller
         $credentials = $request->validated();
         
         if (Auth::attempt($credentials)) {
+            $userId = Auth::id();
+            DB::table('users')
+                ->where('id', $userId)
+                ->update(['last_login' => now()]);
+            
             $request->session()->regenerate();
             return redirect()->intended(route('home'))->with('success', 'Connexion réussie');
         }
@@ -127,8 +135,64 @@ class ApiController extends Controller
 
     public function dashboard()
     {
-        
         return view('pages.dashboard');
+    }
+
+    public function listeUtilisateurs()
+    {
+        $users = User::with('role')->get();
+        $administrateurs = User::where('role_id', 1)->count();
+        return view('pages.liste-utilisateur', compact('users', 'administrateurs'));
+    }
+
+    public function listeProduits()
+    {
+        $produits = Produit::with('categorie')->get();
+        return view('pages.liste-produit', compact('produits'));
+    }
+
+    public function ajoutMarque(Request $request)
+    {
+        $validated = $request->validate([
+            'nom' => 'required|string|max:100|unique:marques,nom',
+            'description' => 'required|string|max:255',
+            'logo' => 'nullable|string|max:255'
+        ]);
+
+        try {
+            $marque = new Marque();
+            $marque->nom = $validated['nom'];
+            $marque->description = $validated['description'];
+            $marque->logo = $validated['logo'] ?? null;
+            
+            $marque->save();
+            
+            return redirect()->route('produits')->with('success', 'Marque "' . $marque->nom . '" créée avec succès');
+            
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Erreur lors de la création de la marque: ' . $e->getMessage());
+        }
+    }
+
+    public function ajoutCategorie(Request $request)
+    {
+        $validated = $request->validate([
+            'nom' => 'required|string|max:255|unique:categories,nom',
+            'description' => 'nullable|string|max:1000'
+        ]);
+
+        try {
+            $categorie = new \App\Models\Categorie();
+            $categorie->nom = $validated['nom'];
+            $categorie->description = $validated['description'] ?? null;
+            
+            $categorie->save();
+            
+            return redirect()->route('produits')->with('success', 'Catégorie "' . $categorie->nom . '" créée avec succès');
+            
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Erreur lors de la création de la catégorie: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -176,7 +240,22 @@ class ApiController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $user = User::find($id);
+        $user->delete();
+        return redirect()->route('/')->with('success', 'Utilisateur supprimé');
+    }
+
+    /**
+     * Déconnexion de l'utilisateur
+     */
+    public function logout(Request $request)
+    {
+        Auth::logout();
+        
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        
+        return redirect()->route('index')->with('success', 'Déconnexion réussie');
     }
 }
 

@@ -32,6 +32,7 @@
 </head>
 <body class="bg-gray-50">
     <div class="flex h-screen">
+        
         <!-- Sidebar -->
         <aside class="w-64 bg-white shadow-lg flex-shrink-0">
             <div class="p-6">
@@ -45,7 +46,7 @@
 
                 <!-- Navigation -->
                 <nav class="space-y-2">
-                    <a href="#" class="sidebar-item active flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-200">
+                    <a href="{{route('home')}}" class="sidebar-item active flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-200">
                         <i class="fas fa-home w-5"></i>
                         <span>Tableau de bord</span>
                     </a>
@@ -64,12 +65,12 @@
                         <span>Fournisseurs</span>
                     </a>
 
-                    <a href="#" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-200">
+                    <a href="{{ route('utilisateurs')}}" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-200">
                         <i class="fas fa-user w-5"></i>
                         <span>Utilisateurs</span>
                     </a>
                     
-                    <a href="#" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-200">
+                    <a href="{{ route('produits')}}" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-200">
                         <i class="fas fa-box w-5"></i>
                         <span>Produits</span>
                     </a>
@@ -102,6 +103,45 @@
         </aside>
 
         <div class="flex-1 flex flex-col overflow-hidden">
+        
+            <header class="bg-white shadow-sm border-b">
+                <div class="flex items-center justify-between px-6 py-4">
+                    <div class="flex items-center space-x-4">
+                        <button onclick="toggleSidebar()" class="text-gray-500 hover:text-gray-700 lg:hidden">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                        <h2 class="text-2xl font-semibold text-gray-800">Tableau de bord</h2>
+                    </div>
+                    
+                    <div class="flex items-center space-x-4">
+                        <!-- Notifications -->
+                        <button class="relative text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-bell"></i>
+                            <span class="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                        </button>
+                        
+                        <!-- Search -->
+                        <div class="hidden md:flex items-center bg-gray-100 rounded-lg px-3 py-2">
+                            <i class="fas fa-search text-gray-400 mr-2"></i>
+                            <input type="text" placeholder="Rechercher..." class="bg-transparent outline-none text-sm w-48">
+                        </div>
+                        
+                        <!-- User menu -->
+                        <div class="relative">
+                            <button onclick="toggleDropdown(event)" class="flex items-center space-x-3 hover:bg-gray-100 rounded-lg px-3 py-2 transition-colors">
+                                <div class="text-right hidden sm:block">
+                                    <p class="text-sm font-medium text-gray-700" id="topUserName">Utilisateur</p>
+                                    <p class="text-xs text-gray-500">En ligne</p>
+                                </div>
+                                <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-user text-gray-600 text-sm"></i>
+                                </div>
+                                <i class="fas fa-chevron-down text-gray-400 text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </header>
             @yield('content')    
         </div>
     </div>
@@ -206,6 +246,9 @@
         document.addEventListener('DOMContentLoaded', function() {
             checkAuth();
             
+            // Afficher les alertes
+            showAlerts();
+            
             // Ajouter l'active class au menu item courant
             const currentPath = window.location.pathname;
             const menuItems = document.querySelectorAll('.sidebar-item');
@@ -219,6 +262,25 @@
                 });
             });
         });
+
+        // Fonction pour afficher les alertes
+        function showAlerts() {
+            @if(session('success'))
+                alert('✅ Succès : {{ session('success') }}');
+            @endif
+
+            @if(session('error'))
+                alert('❌ Erreur : {{ session('error') }}');
+            @endif
+
+            @if(session('info'))
+                alert('ℹ️ Information : {{ session('info') }}');
+            @endif
+
+            @if(session('warning'))
+                alert('⚠️ Attention : {{ session('warning') }}');
+            @endif
+        }
     </script>
 </body>
 </html>

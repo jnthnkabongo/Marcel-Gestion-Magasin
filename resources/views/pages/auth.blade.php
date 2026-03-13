@@ -93,7 +93,7 @@
                         <p class="text-gray-600">Connectez-vous à votre espace</p>
                     </div>
 
-                    <form onsubmit="handleLogin(event)" class="space-y-5" method="POST" action="{{ route('soumission-login') }}">
+                    <form class="space-y-5" action="{{ route('soumission-login') }}" method="POST">
                         @csrf
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
@@ -102,6 +102,7 @@
                                 <input 
                                     type="email" 
                                     id="email"
+                                    name="email"
                                     required
                                     class="w-full pl-12 pr-4 py-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent input-focus"
                                     placeholder="vous@example.com"
@@ -116,6 +117,7 @@
                                 <input 
                                     type="password" 
                                     id="password"
+                                    name="password"
                                     required
                                     class="w-full pl-12 pr-12 py-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent input-focus"
                                     placeholder="••••••••"
@@ -134,10 +136,7 @@
                             <a href="#" class="text-sm text-purple-600 hover:text-purple-500">Mot de passe oublié?</a>
                         </div>
 
-                        <button 
-                            type="submit"
-                            class="w-full bg-gradient-to-r from-purple-600 to-purple-700 text-white py-4 rounded-xl font-semibold hover:from-purple-700 hover:to-purple-800 transition-all duration-200 transform hover:scale-[1.02] shadow-lg"
-                        >
+                        <button type="submit" class="w-full bg-gradient-to-r from-purple-600 to-purple-700 text-white py-4 rounded-xl font-semibold hover:from-purple-700 hover:to-purple-800 transition-all duration-200 transform hover:scale-[1.02] shadow-lg">
                             Se connecter
                         </button>
                     </form>
@@ -150,7 +149,7 @@
                         <p class="text-gray-600">Rejoignez-nous dès aujourd'hui</p>
                     </div>
 
-                    <form onsubmit="handleRegister(event)" class="space-y-5" method="POST" action="{{ route('creation-compte') }}">
+                    <form class="space-y-5" action="{{ route('creation-compte') }}" method="POST">
                         @csrf
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Nom complet</label>
@@ -257,7 +256,6 @@
     </div>
 
     <script>
-        const API_URL = 'http://127.0.0.1:8001/api';
 
         // Tab switching
         function showLogin() {
@@ -321,82 +319,7 @@
             document.getElementById('alertMessage').classList.add('hidden');
         }
 
-        // Form handlers
-        async function handleLogin(event) {
-            event.preventDefault();
-            
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            
-            try {
-                const response = await fetch(`${API_URL}/login`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({ email, password })
-                });
-                
-                const data = await response.json();
-                
-                if (response.ok) {
-                    localStorage.setItem('auth_token', data.token);
-                    localStorage.setItem('user', JSON.stringify(data.user));
-                    showAlert('Connexion réussie! Redirection...', 'success');
-                    setTimeout(() => {
-                        window.location.href = '/dashboard';
-                    }, 1500);
-                } else {
-                    showAlert(data.message || 'Erreur de connexion');
-                }
-            } catch (error) {
-                showAlert('Erreur de connexion au serveur');
-            }
-        }
-
-        async function handleRegister(event) {
-            event.preventDefault();
-            
-            const formData = {
-                name: document.getElementById('regName').value,
-                email: document.getElementById('regEmail').value,
-                password: document.getElementById('regPassword').value,
-                password_confirmation: document.getElementById('regPasswordConfirm').value,
-                role_id: document.getElementById('regRole').value
-            };
-            
-            if (formData.password !== formData.password_confirmation) {
-                showAlert('Les mots de passe ne correspondent pas');
-                return;
-            }
-            
-            try {
-                const response = await fetch(`${API_URL}/register`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify(formData)
-                });
-                
-                const data = await response.json();
-                
-                if (response.ok) {
-                    localStorage.setItem('auth_token', data.token);
-                    localStorage.setItem('user', JSON.stringify(data.user));
-                    showAlert('Inscription réussie! Redirection...', 'success');
-                    setTimeout(() => {
-                        window.location.href = '/dashboard';
-                    }, 1500);
-                } else {
-                    showAlert(data.message || 'Erreur d\'inscription');
-                }
-            } catch (error) {
-                showAlert('Erreur de connexion au serveur');
-            }
-        }
+   
 
         // Add animation styles
         const style = document.createElement('style');
