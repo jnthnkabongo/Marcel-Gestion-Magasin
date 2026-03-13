@@ -91,16 +91,22 @@
                                     <input type="checkbox" class="rounded border-gray-300">
                                 </th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Nom
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Catégorie
                                 </th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Modèle
+                                    Marque
                                 </th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Description
+                                    Nom
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Modéle
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Numéro série
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Deescription
                                 </th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Prix d'achat
@@ -134,24 +140,32 @@
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        {{ $produit->categorie->id }}
+                                        {{ $produit->categorie ? $produit->categorie->nom : 'Non défini' }}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                            {{ $produit->marque->nom === 'admin' ? 'bg-red-100 text-red-800' : 
-                                               ($produit->marque->nom === 'Manager' ? 'bg-blue-100 text-blue-800' : 
-                                               'bg-gray-100 text-gray-800') }}">
-                                            {{ $produit->marque->nom }}
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ">
+                                            
+                                            {{ $produit->marque ? $produit->marque->nom : 'Non défini' }}
                                         </span>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                            {{ $produit->modele ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
-                                            {{ $produit->modele ? 'Actif' : 'Inactif' }}
-                                        </span>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            {{ $produit->modele ?? 'Non défini' }}
+                                        
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        {{ $produit->stock_minimum }}
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        {{ $produit->produitUnites && $produit->produitUnites->isNotEmpty() ? $produit->produitUnites->first()->numero_serie : 'Aucun' }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        {{ $produit->description ?? 'Aucune description' }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        {{ $produit->prix_achat ?? '0' }} $
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        {{ $produit->prix_vente ?? '0' }} $
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        {{ $produit->stock_min ?? '0' }}
                                     </td>
                                    
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -197,36 +211,55 @@
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
-                <form class="space-y-4">
+                <form class="space-y-4" method="POST" action="{{ route('produits.ajout') }}">
+                    @csrf
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Nom du produit</label>
-                        <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Entrez le nom">
+                        <input type="text" name="nom" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Entrez le nom">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Catégorie</label>
-                        <select class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <select name="categorie_id" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                             <option>Sélectionner une catégorie</option>
+                            @foreach ($categories as $categorie)
+                                <option value="{{ $categorie->id }}">{{ $categorie->nom }}</option>
+                            @endforeach
                         </select>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Marque</label>
-                        <select class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <select name="marque_id" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                             <option>Sélectionner une marque</option>
+                            @foreach ($marques as $marque)
+                                <option value="{{ $marque->id }}">{{ $marque->nom }}</option>
+                            @endforeach
                         </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Modèle</label>
+                        <input type="text" name="modele" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Entrez le modèle">
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Prix d'achat</label>
-                            <input type="number" step="0.01" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="0.00">
+                            <input type="number" step="0.01" name="prix_achat" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="0.00">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Prix de vente</label>
-                            <input type="number" step="0.01" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="0.00">
+                            <input type="number" step="0.01" name="prix_vente" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="0.00">
                         </div>
                     </div>
                     <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Numéro série</label>
+                        <input type="text" name="numero_serie" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Entrez le numéro de série">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Stock minimum</label>
+                        <input type="number" name="stock_min" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Entrez le stock minimum">
+                    </div>
+                    <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                        <textarea class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" rows="3" placeholder="Description du produit"></textarea>
+                        <textarea name="description" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" rows="3" placeholder="Description du produit"></textarea>
                     </div>
                     <div class="flex justify-end space-x-3 pt-4">
                         <button type="button" onclick="closeModal('modalNouveauProduit')" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">

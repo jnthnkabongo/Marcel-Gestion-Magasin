@@ -6,6 +6,7 @@ use App\Http\Requests\Credentials;
 use App\Http\Requests\RegisterRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use App\Models\Historique;
 use App\Models\HistoriqueAction;
 use App\Models\Produit;
@@ -23,7 +24,6 @@ use App\Models\VenteDetail;
 use App\Models\Garantie;
 use App\Models\Paiement;
 use App\Models\ApprovisionnementDetail;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 
 class ApiController extends Controller
@@ -158,8 +158,10 @@ class ApiController extends Controller
 
     public function listeProduits()
     {
-        $produits = Produit::with('categorie')->get();
-        return view('pages.liste-produit', compact('produits'));
+        $produits = Produit::with('categorie','marque', 'produitUnites', 'approvisionnementDetails')->get();
+        $categories = Categorie::orderBy('created_at','desc')->get();
+        $marques = Marque::orderBy('created_at','desc')->get();
+        return view('pages.liste-produit', compact('produits', 'categories', 'marques'));
     }
 
     public function ajoutMarque(Request $request)
@@ -193,7 +195,7 @@ class ApiController extends Controller
         ]);
 
         try {
-            $categorie = new \App\Models\Categorie();
+            $categorie = new Categorie();
             $categorie->nom = $validated['nom'];
             $categorie->description = $validated['description'] ?? null;
             
@@ -203,6 +205,53 @@ class ApiController extends Controller
             
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Erreur lors de la création de la catégorie: ' . $e->getMessage());
+        }
+    }
+
+    public function ajoutProduit(Request $request)
+    {
+        $validated = $request->validate([
+            'nom' => 'required|string|max:255',
+            'categorie_id' => 'required|exists:categories,id',
+            'marque_id' => 'required|exists:marques,id',
+            'modele' => 'nullable|string|max:255',
+            'description' => 'nullable|string|max:1000',
+            'prix_achat' => 'required|numeric',
+            'prix_vente' => 'required|numeric',
+            'stock_min' => 'required|numeric',
+            'numero_serie' => 'required|string|max:255'
+        ]);
+
+        try {
+
+            // Création du produit
+            $produit = new Produit();
+            $produit->nom = $validated['nom'];
+            $produit->categorie_id = $validated['categorie_id'];
+            $produit->marque_id = $validated['marque_id'];
+            $produit->modele = $validated['modele'] ?? null;
+            $produit->description = $validated['description'] ?? null;
+            $produit->prix_achat = $validated['prix_achat'];
+            $produit->prix_vente = $validated['prix_vente'];
+            $produit->stock_min = $validated['stock_min'];
+            $produit->save();
+
+            // Création de l'unité produit
+            $produitUnit = new ProduitUnite();
+            $produitUnit->produit_id = $produit->id;
+            $produitUnit->numero_serie = $validated['numero_serie'];
+            $produitUnit->statut = 'en_stock';
+            $produitUnit->save();
+
+            return redirect()
+                ->route('produits')
+                ->with('success', 'Produit "' . $produit->nom . '" créé avec succès');
+
+        } catch (\Exception $e) {
+            dd($e->getMessage());
+            return redirect()
+                ->back()
+                ->with('error', 'Erreur lors de la création du produit : ' . $e->getMessage());
         }
     }
 
