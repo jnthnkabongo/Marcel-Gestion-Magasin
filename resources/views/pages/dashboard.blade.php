@@ -22,7 +22,7 @@
                         </div>
                         <div>
                             <p class="text-gray-500 text-sm">Utilisateurs</p>
-                            <p class="text-2xl font-bold text-gray-800">-</p>
+                            <p class="text-2xl font-bold text-gray-800">{{ $totalUtilisateurs }}</p>
                         </div>
                     </div>
                 </div>
@@ -34,7 +34,7 @@
                         </div>
                         <div>
                             <p class="text-gray-500 text-sm">Produits</p>
-                            <p class="text-2xl font-bold text-gray-800">-</p>
+                            <p class="text-2xl font-bold text-gray-800">{{ $totalProduts }}</p>
                         </div>
                     </div>
                 </div>
@@ -46,7 +46,7 @@
                         </div>
                         <div>
                             <p class="text-gray-500 text-sm">Ventes</p>
-                            <p class="text-2xl font-bold text-gray-800">-</p>
+                            <p class="text-2xl font-bold text-gray-800">{{ $totalVentes}}</p>
                         </div>
                     </div>
                 </div>
@@ -58,7 +58,7 @@
                         </div>
                         <div>
                             <p class="text-gray-500 text-sm">Revenus</p>
-                            <p class="text-2xl font-bold text-gray-800">-</p>
+                            <p class="text-2xl font-bold text-gray-800">{{ $totalClients }}</p>
                         </div>
                     </div>
                 </div>

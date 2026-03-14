@@ -74,10 +74,15 @@
                         <i class="fas fa-box w-5"></i>
                         <span>Produits</span>
                     </a>
-                    <a href="{{ route('parametres')}}" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-200">
+                    
+                    {{-- <a href="{{ route('historiques')}}" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-200">
+                        <i class="fas fa-history w-5"></i>
+                        <span>Historiques</span>
+                    </a> --}}
+                    {{-- <a href="{{ route('parametres')}}" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-200">
                         <i class="fas fa-cog w-5"></i>
                         <span>Paramètres</span>
-                    </a>
+                    </a> --}}
                     
                     <a href="#" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-200">
                         <i class="fas fa-shopping-cart w-5"></i>
@@ -86,7 +91,7 @@
                     
                     <a href="#" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-200">
                         <i class="fas fa-warehouse w-5"></i>
-                        <span>Stock</span>
+                        <span>Approvionnement</span>
                     </a>
                     
                     <div class="pt-4 pb-2">
@@ -98,7 +103,7 @@
                         <span>Paramètres</span>
                     </a>
                     
-                    <a href="#" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-200">
+                    <a href="{{ route('historiques')}}" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-200">
                         <i class="fas fa-history w-5"></i>
                         <span>Historique</span>
                     </a>
@@ -286,5 +291,7 @@
             @endif
         }
     </script>
+    
+    @stack('scripts')
 </body>
 </html>

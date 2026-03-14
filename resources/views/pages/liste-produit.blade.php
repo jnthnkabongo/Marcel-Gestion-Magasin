@@ -37,7 +37,7 @@
                         </div>
                         <div>
                             <p class="text-gray-500 text-sm">Total produits</p>
-                            <p class="text-2xl font-bold text-gray-800">{{ count($produits) }}</p>
+                            <p class="text-2xl font-bold text-gray-800">{{ $totalProduit }}</p>
                         </div>
                     </div>
                 </div>
@@ -48,8 +48,8 @@
                             <i class="fas fa-warehouse text-green-600"></i>
                         </div>
                         <div>
-                            <p class="text-gray-500 text-sm">Produits en stock</p>
-                            <p class="text-2xl font-bold text-gray-800">{{ $produits->where('stock', '>', 0)->count() }}</p>
+                            <p class="text-gray-500 text-sm">Total quantité en stock</p>
+                            <p class="text-2xl font-bold text-gray-800">{{ $totalProduitStock }}</p>
                         </div>
                     </div>
                 </div>
@@ -60,8 +60,8 @@
                             <i class="fas fa-chart-line text-purple-600"></i>
                         </div>
                         <div>
-                            <p class="text-gray-500 text-sm">Produits populaires</p>
-                            <p class="text-2xl font-bold text-gray-800">{{ $produits->take(5)->count() }}</p>
+                            <p class="text-gray-500 text-sm">Produits vendus</p>
+                            <p class="text-2xl font-bold text-gray-800">{{ $totalProduitStockVendu }}</p>
                         </div>
                     </div>
                 </div>
@@ -106,18 +106,21 @@
                                     Numéro série
                                 </th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Deescription
+                                    Code-barres
                                 </th>
+                                {{-- <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Deescription
+                                </th> --}}
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Prix d'achat
                                 </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider col-prix-vente">
                                     Prix de vente
                                 </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider col-stock">
                                     Stock minimum
                                 </th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider col-actions">
                                     Actions
                                 </th>
                             </tr>
@@ -134,18 +137,18 @@
                                                 <i class="fas fa-box text-gray-600 text-sm"></i>
                                             </div>
                                             <div>
-                                                <div class="text-sm font-medium text-gray-900">{{ $produit->nom }}</div>
+                                                <div class="text-sm font-medium text-gray-900">{{ $produit->categorie->nom }}</div>
                                                 <div class="text-xs text-gray-500">ID: {{ $produit->id }}</div>
                                             </div>
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        {{ $produit->categorie ? $produit->categorie->nom : 'Non défini' }}
+                                        {{ $produit->categorie ? $produit->marque->nom : 'Non défini' }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                         <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ">
                                             
-                                            {{ $produit->marque ? $produit->marque->nom : 'Non défini' }}
+                                            {{ $produit->marque ? $produit->nom : 'Non défini' }}
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -156,8 +159,15 @@
                                         {{ $produit->produitUnites && $produit->produitUnites->isNotEmpty() ? $produit->produitUnites->first()->numero_serie : 'Aucun' }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        @if($produit->produitUnites && $produit->produitUnites->isNotEmpty())
+                                            <svg id="barcode-{{ $produit->id }}" class="barcode"></svg>
+                                        @else
+                                            <span class="text-gray-400">-</span>
+                                        @endif
+                                    {{-- </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                         {{ $produit->description ?? 'Aucune description' }}
-                                    </td>
+                                    </td> --}}
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                         {{ $produit->prix_achat ?? '0' }} $
                                     </td>
@@ -170,10 +180,10 @@
                                    
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         <button class="text-blue-600 hover:text-blue-700 mr-2">
-                                            <i class="fas fa-edit text-2xl"></i>
+                                            <i class="fas fa-edit text-xl"></i>
                                         </button>
                                         <button class="text-red-600 hover:text-red-700">
-                                            <i class="fas fa-trash text-2xl"></i>
+                                            <i class="fas fa-trash text-xl"></i>
                                         </button>
                                         {{-- <form action="{{ route('users.destroy', $user->id) }}" method="POST" style="display: inline;">
                                             @csrf
@@ -184,7 +194,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="8" class="px-6 py-8 text-center text-gray-500">
+                                    <td colspan="9" class="px-6 py-8 text-center text-gray-500">
                                         <i class="fas fa-box text-4xl mb-3 text-gray-300"></i>
                                         <p>Aucun produit trouvé</p>
                                         <p class="text-sm">Commencez par ajouter un nouvel produit</p>
@@ -196,18 +206,18 @@
                 </div>
                 
                 <!-- Pagination -->
-                {{-- @if ($users->hasPages())
+                @if ($produits->hasPages())
                     <div class="px-6 py-4 border-t border-gray-200">
-                        {{ $users->links() }}
+                        {{ $produits->links() }}
                     </div>
-                @endif --}}
+                @endif
             </div>
         </main>
     </div>
 
     <!-- Modal Nouveau Produit -->
     <div id="modalNouveauProduit" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
-        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="relative top-10 mx-auto p-6 border w-[600px] shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
             <div class="mt-3">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-lg font-bold text-gray-900">Nouveau Produit</h3>
@@ -217,53 +227,63 @@
                 </div>
                 <form class="space-y-4" method="POST" action="{{ route('produits.ajout') }}">
                     @csrf
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Nom du produit</label>
-                        <input type="text" name="nom" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Entrez le nom">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nom du produit</label>
+                            <input type="text" name="nom" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Entrez le nom" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Catégorie</label>
+                            <select name="categorie_id" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                                <option value="">Sélectionner une catégorie</option>
+                                @foreach ($categories as $categorie)
+                                    <option value="{{ $categorie->id }}">{{ $categorie->nom }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Catégorie</label>
-                        <select name="categorie_id" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option>Sélectionner une catégorie</option>
-                            @foreach ($categories as $categorie)
-                                <option value="{{ $categorie->id }}">{{ $categorie->nom }}</option>
-                            @endforeach
-                        </select>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Marque</label>
+                            <select name="marque_id" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                                <option value="">Sélectionner une marque</option>
+                                @foreach ($marques as $marque)
+                                    <option value="{{ $marque->id }}">{{ $marque->nom }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Modèle</label>
+                            <input type="text" name="modele" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Entrez le modèle">
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Marque</label>
-                        <select name="marque_id" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option>Sélectionner une marque</option>
-                            @foreach ($marques as $marque)
-                                <option value="{{ $marque->id }}">{{ $marque->nom }}</option>
-                            @endforeach
-                        </select>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Numéro série</label>
+                            <input type="text" name="numero_serie" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Entrez le numéro de série" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Stock minimum</label>
+                            <input type="number" name="stock_min" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Entrez le stock minimum" required>
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Modèle</label>
-                        <input type="text" name="modele" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Entrez le modèle">
-                    </div>
+                    
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Prix d'achat</label>
-                            <input type="number" step="0.01" name="prix_achat" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="0.00">
+                            <input type="number" step="0.01" name="prix_achat" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Entrez le prix d'achat" required>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Prix de vente</label>
-                            <input type="number" step="0.01" name="prix_vente" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="0.00">
+                            <input type="number" step="0.01" name="prix_vente" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Entrez le prix de vente" required>
                         </div>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Numéro série</label>
-                        <input type="text" name="numero_serie" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Entrez le numéro de série">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Stock minimum</label>
-                        <input type="number" name="stock_min" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Entrez le stock minimum">
-                    </div>
+                    
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                        <textarea name="description" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" rows="3" placeholder="Description du produit"></textarea>
+                        <textarea name="description" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" rows="3" placeholder="Entrez la description du produit"></textarea>
                     </div>
                     <div class="flex justify-end space-x-3 pt-4">
                         <button type="button" onclick="closeModal('modalNouveauProduit')" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
@@ -373,3 +393,35 @@
         });
     </script>
 @endsection
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('JsBarcode chargé:', typeof JsBarcode);
+    
+    // Générer les codes-barres pour chaque produit
+    @foreach($produits as $produit)
+        @if($produit->produitUnites && $produit->produitUnites->isNotEmpty())
+            <?php $numeroSerie = $produit->produitUnites->first()->numero_serie; ?>
+            console.log('Génération code-barres pour produit {{ $produit->id }}: {{ $numeroSerie }}');
+            
+            try {
+                JsBarcode("#barcode-{{ $produit->id }}", "{{ $numeroSerie }}", {
+                    format: "CODE128",
+                    width: 1.5,      // Plus fin
+                    height: 30,       // Plus court
+                    displayValue: true,
+                    fontSize: 10,     // Texte plus petit
+                    margin: 3         // Marge réduite
+                });
+                console.log('Code-barres généré pour produit {{ $produit->id }}');
+            } catch (error) {
+                console.error('Erreur génération code-barres pour produit {{ $produit->id }}:', error);
+            }
+        @endif
+    @endforeach
+});
+</script>
+@endpush

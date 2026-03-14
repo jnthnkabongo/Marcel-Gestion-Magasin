@@ -29,7 +29,7 @@ use Illuminate\Support\Facades\DB;
 class ApiController extends Controller
 {
     /** LES FONCTIONS DE L'API */
-    public function ajouterHistoriques(string $action, string $description = null)
+    public function ajouterHistorique(string $action, string $description = null)
     {
         $user = Auth::user();
 
@@ -146,22 +146,77 @@ class ApiController extends Controller
 
     public function dashboard()
     {
-        return view('pages.dashboard');
+        $totalUtilisateurs = User::count();
+        $totalProduts = Produit::count();
+        $totalVentes = Vente::count();
+        $totalClients = Client::count();
+        $this->ajouterHistorique('dashboard', 'consultation', 'Dashboard');
+        return view('pages.dashboard', compact('totalUtilisateurs', 'totalProduts', 'totalVentes', 'totalClients'));
     }
+
+    // public function listeHistoriques()
+    // {
+    //     // Statistiques
+    //     $historiquesAujourdhui = HistoriqueAction::whereDate('created_at', today())->count();
+    //     $totalCreations = HistoriqueAction::where('action', 'creation')->count();
+    //     $totalModifications = HistoriqueAction::where('action', 'modification')->count();
+    //     $totalSuppressions = HistoriqueAction::where('action', 'suppression')->count();
+        
+    //     // Liste des historiques avec pagination
+    //     $historiques = HistoriqueAction::with('user')
+    //         ->orderBy('created_at', 'desc')
+    //         ->paginate(20);
+            
+    //     // Liste des utilisateurs pour le filtre
+    //     $users = User::orderBy('name')->get();
+        
+    //     return view('pages.historiques', compact(
+    //         'historiques', 
+    //         'historiquesAujourdhui', 
+    //         'totalCreations', 
+    //         'totalModifications', 
+    //         'totalSuppressions',
+    //         'users'
+    //     ));
+    // }
 
     public function listeUtilisateurs()
     {
         $users = User::with('role')->get();
         $administrateurs = User::where('role_id', 1)->count();
+
+        $this->ajouterHistorique('liste-utilisateurs', 'consultation', 'Liste des utilisateurs');
+
         return view('pages.liste-utilisateur', compact('users', 'administrateurs'));
     }
 
     public function listeProduits()
     {
-        $produits = Produit::with('categorie','marque', 'produitUnites', 'approvisionnementDetails')->get();
+        $totalProduit = Produit::count();
+        // $totalProduit = DB::table('produits')
+        //     ->join('produit_unites', 'produits.id', '=', 'produit_unites.produit_id')
+        //     //->where('produit_unites.quantite', '>', 0)
+        //     ->select('produits.*', 'produit_unites.numero_serie')
+        //     ->count();
+
+        $totalProduitStock = DB::table('produits')
+            ->join('produit_unites', 'produits.id', '=', 'produit_unites.produit_id')
+            ->where('produit_unites.statut', 'en_stock')
+            ->select('produits.*', 'produit_unites.numero_serie')
+            ->count();
+
+        $totalProduitStockVendu = DB::table('produits')
+            ->join('produit_unites', 'produits.id', '=', 'produit_unites.produit_id')
+            ->where('produit_unites.statut', 'vendu')
+            ->select('produits.*', 'produit_unites.numero_serie')
+            ->count();
+
+        $this->ajouterHistorique('liste-produits', 'consultation', 'Liste des produits');
+
+        $produits = Produit::with('categorie','marque', 'produitUnites', 'approvisionnementDetails')->orderBy('created_at', 'desc')->paginate('10');
         $categories = Categorie::orderBy('created_at','desc')->get();
         $marques = Marque::orderBy('created_at','desc')->get();
-        return view('pages.liste-produit', compact('produits', 'categories', 'marques'));
+        return view('pages.liste-produit', compact('produits', 'categories', 'marques', 'totalProduit', 'totalProduitStock', 'totalProduitStockVendu'));
     }
 
     public function ajoutMarque(Request $request)
@@ -180,6 +235,8 @@ class ApiController extends Controller
             
             $marque->save();
             
+            $this->ajouterHistorique('ajout-marque', 'creation', 'Marque "' . $marque->nom . '" créée');
+
             return redirect()->route('produits')->with('success', 'Marque "' . $marque->nom . '" créée avec succès');
             
         } catch (\Exception $e) {
@@ -200,6 +257,8 @@ class ApiController extends Controller
             $categorie->description = $validated['description'] ?? null;
             
             $categorie->save();
+
+            $this->ajouterHistorique('ajout-categorie', 'creation', 'Catégorie "' . $categorie->nom . '" créée');
             
             return redirect()->route('produits')->with('success', 'Catégorie "' . $categorie->nom . '" créée avec succès');
             
@@ -243,6 +302,8 @@ class ApiController extends Controller
             $produitUnit->statut = 'en_stock';
             $produitUnit->save();
 
+            $this->ajouterHistorique('ajout-produit', 'creation', 'Produit "' . $produit->nom . '" créé');
+
             return redirect()
                 ->route('produits')
                 ->with('success', 'Produit "' . $produit->nom . '" créé avec succès');
@@ -259,7 +320,36 @@ class ApiController extends Controller
     {
         $marques = Marque::all();
         $categories = Categorie::all();
+
+        $this->ajouterHistorique('parametres', 'consultation', 'Page des paramètres');
+
         return view('pages.parametres', compact('marques', 'categories'));
+    }
+
+    public function historiques(){
+        // Statistiques
+        $historiquesAujourdhui = HistoriqueAction::whereDate('created_at', today())->count();
+        $totalCreations = HistoriqueAction::where('action', 'creation')->count();
+        $totalModifications = HistoriqueAction::where('action', 'modification')->count();
+        $totalSuppressions = HistoriqueAction::where('action', 'suppression')->count();
+        
+        // Liste des historiques avec pagination
+        $historiques = HistoriqueAction::with('user')
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+            
+        // Liste des utilisateurs pour le filtre
+        $users = User::orderBy('name')->get();
+        
+        return view('pages.historiques', compact(
+            'historiques', 
+            'historiquesAujourdhui', 
+            'totalCreations', 
+            'totalModifications', 
+            'totalSuppressions',
+            'users'
+        ));
+        //return view('pages.historiques');
     }
 
     /**

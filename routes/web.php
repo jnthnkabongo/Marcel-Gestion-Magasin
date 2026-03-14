@@ -9,6 +9,7 @@ Route::post('/creation-compte', [ApiController::class, 'register'])->name('creat
 Route::get('/dashboard', [ApiController::class, 'dashboard'])->name('home');
 Route::get('/utilisateurs', [ApiController::class, 'listeUtilisateurs'])->name('utilisateurs');
 Route::get('/produits', [ApiController::class, 'listeProduits'])->name('produits');
+Route::get('/historiques', [ApiController::class, 'historiques'])->name('historiques');
 Route::post('/produit/ajout', [ApiController::class, 'ajoutProduit'])->name('produits.ajout');
 Route::get('/parametres', [ApiController::class, 'parametres'])->name('parametres');
 Route::post('/marques/ajout', [ApiController::class, 'ajoutMarque'])->name('marques.ajout');

@@ -25,7 +25,7 @@
         </div>
 
         <!-- Settings Grid -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             
             <!-- Profil utilisateur -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-200">
@@ -169,6 +169,44 @@
                 </div>
             </div>
 
+            <!-- Support -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+                <div class="p-6 border-b border-gray-200">
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-full flex items-center justify-center mr-4">
+                            <i class="fas fa-headset text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-900">Support</h3>
+                            <p class="text-sm text-gray-500">Aide et assistance</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6 space-y-4">
+                    <div class="text-center">
+                        <div class="w-20 h-20 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-question-circle text-indigo-600 text-3xl"></i>
+                        </div>
+                        <h4 class="font-medium text-gray-900 mb-2">Besoin d'aide ?</h4>
+                        <p class="text-sm text-gray-600 mb-4">Notre équipe est disponible pour vous assister</p>
+                    </div>
+                    <div class="space-y-2">
+                        <button class="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+                            <i class="fas fa-comments mr-2"></i>
+                            Chat en direct
+                        </button>
+                        <button class="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
+                            <i class="fas fa-envelope mr-2"></i>
+                            Envoyer un email
+                        </button>
+                        <button class="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
+                            <i class="fas fa-book mr-2"></i>
+                            Documentation
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <!-- Marques -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-200">
                 <div class="p-6 border-b border-gray-200">
@@ -306,43 +344,6 @@
                 </div>
             </div>
 
-            <!-- Support -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200">
-                <div class="p-6 border-b border-gray-200">
-                    <div class="flex items-center">
-                        <div class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-full flex items-center justify-center mr-4">
-                            <i class="fas fa-headset text-white text-xl"></i>
-                        </div>
-                        <div>
-                            <h3 class="font-semibold text-gray-900">Support</h3>
-                            <p class="text-sm text-gray-500">Aide et assistance</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="p-6 space-y-4">
-                    <div class="text-center">
-                        <div class="w-20 h-20 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <i class="fas fa-question-circle text-indigo-600 text-3xl"></i>
-                        </div>
-                        <h4 class="font-medium text-gray-900 mb-2">Besoin d'aide ?</h4>
-                        <p class="text-sm text-gray-600 mb-4">Notre équipe est disponible pour vous assister</p>
-                    </div>
-                    <div class="space-y-2">
-                        <button class="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
-                            <i class="fas fa-comments mr-2"></i>
-                            Chat en direct
-                        </button>
-                        <button class="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
-                            <i class="fas fa-envelope mr-2"></i>
-                            Envoyer un email
-                        </button>
-                        <button class="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
-                            <i class="fas fa-book mr-2"></i>
-                            Documentation
-                        </button>
-                    </div>
-                </div>
-            </div>
 
         </div>
     </main>
