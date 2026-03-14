@@ -213,7 +213,7 @@ class ApiController extends Controller
 
         $this->ajouterHistorique('liste-produits', 'consultation', 'Liste des produits');
 
-        $produits = Produit::with('categorie','marque', 'produitUnites', 'approvisionnementDetails')->orderBy('created_at', 'desc')->paginate('10');
+        $produits = Produit::with('categorie','marque', 'produitUnites', 'approvisionnementDetails')->orderBy('created_at', 'desc')->paginate('7');
         $categories = Categorie::orderBy('created_at','desc')->get();
         $marques = Marque::orderBy('created_at','desc')->get();
         return view('pages.liste-produit', compact('produits', 'categories', 'marques', 'totalProduit', 'totalProduitStock', 'totalProduitStockVendu'));

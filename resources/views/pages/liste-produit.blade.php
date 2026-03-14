@@ -117,9 +117,9 @@
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider col-prix-vente">
                                     Prix de vente
                                 </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider col-stock">
+                                {{-- <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider col-stock">
                                     Stock minimum
-                                </th>
+                                </th> --}}
                                 <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider col-actions">
                                     Actions
                                 </th>
@@ -174,9 +174,9 @@
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                         {{ $produit->prix_vente ?? '0' }} $
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    {{-- <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                         {{ $produit->stock_min ?? '0' }}
-                                    </td>
+                                    </td> --}}
                                    
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         <button class="text-blue-600 hover:text-blue-700 mr-2">
@@ -213,11 +213,12 @@
                 @endif
             </div>
         </main>
+        <div class="mb-10"></div>
     </div>
 
     <!-- Modal Nouveau Produit -->
     <div id="modalNouveauProduit" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
-        <div class="relative top-10 mx-auto p-6 border w-[600px] shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
+        <div class="relative top-10 mx-auto p-6 border w-[800px] shadow-lg rounded-md bg-white max-h-[150vh] overflow-y-auto">
             <div class="mt-3">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-lg font-bold text-gray-900">Nouveau Produit</h3>
@@ -300,7 +301,7 @@
 
     <!-- Modal Nouvelle Catégorie -->
     <div id="modalNouvelleCategorie" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
-        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="relative top-10 mx-auto p-6 border w-[800px] shadow-lg rounded-md bg-white max-h-[150vh] overflow-y-auto">
             <div class="mt-3">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-lg font-bold text-gray-900">Nouvelle Catégorie</h3>
@@ -333,7 +334,7 @@
 
     <!-- Modal Nouvelle Marque -->
     <div id="modalNouvelleMarque" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
-        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="relative top-20 mx-auto p-6 border w-[800px] shadow-lg rounded-md bg-white max-h-[150vh] overflow-y-auto">
             <div class="mt-3">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-lg font-bold text-gray-900">Nouvelle Marque</h3>

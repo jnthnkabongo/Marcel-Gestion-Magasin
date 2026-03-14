@@ -195,13 +195,14 @@
                 </div>
 
                 <!-- Pagination -->
-                @if(isset($historiques) && $historiques->hasPages())
-                    <div class="px-6 py-4 border-t border-gray-200">
+                @if($historiques->hasPages())
+                    <div class="px-6 py-4 border-t border-gray-200 mb-8">
                         {{ $historiques->links() }}
                     </div>
                 @endif
             </div>
         </div>
+        <div class="mb-10"></div>
     </main>
 </div>
 
@@ -223,3 +224,5 @@
     }
 </style> --}}
 @endsection
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
