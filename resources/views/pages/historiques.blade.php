@@ -206,23 +206,6 @@
     </main>
 </div>
 
-{{-- <style>
-    .table-fixed {
-        table-layout: fixed;
-        width: 100%;
-    }
-    .col-date { width: 120px; }
-    .col-user { width: 200px; }
-    .col-action { width: 120px; }
-    .col-description { width: 300px; }
-    .col-ip { width: 120px; }
-    
-    .text-ellipsis {
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-</style> --}}
 @endsection
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
