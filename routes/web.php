@@ -14,4 +14,7 @@ Route::post('/produit/ajout', [ApiController::class, 'ajoutProduit'])->name('pro
 Route::get('/parametres', [ApiController::class, 'parametres'])->name('parametres');
 Route::post('/marques/ajout', [ApiController::class, 'ajoutMarque'])->name('marques.ajout');
 Route::post('/categories/ajout', [ApiController::class, 'ajoutCategorie'])->name('categories.ajout');
+Route::get('/vente', [ApiController::class, 'vente'])->name('vente');
+Route::post('/vente/ajout', [ApiController::class, 'ajouterVente'])->name('ventes.ajout');
+
 Route::post('/logout', [ApiController::class, 'logout'])->name('logout');

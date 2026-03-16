@@ -352,9 +352,101 @@ class ApiController extends Controller
         //return view('pages.historiques');
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
+    public function vente(){
+        $liste_produits = Produit::with('categorie', 'produitUnites')->orderBy('created_at','desc')->get();
+        $clients = Client::orderBy('created_at', 'desc')->get();
+        $ventes = Vente::with(['client', 'venteDetails.produitUnite.produit'])->orderBy('created_at', 'desc')->paginate('10');
+        $venteJournalier = Vente::whereDate('created_at', today())->count();
+        $ventesSommeJournalier = Vente::whereDate('created_at', today())->sum('total');
+        $ventesSommeTotale = Vente::sum('total');
+        $venteTotale = Vente::count();
+        $ventesSommeMois = Vente::whereMonth('created_at', now()->month)->sum('total');
+        return view('pages.vente-new', compact('liste_produits', 'clients', 'ventes', 'venteJournalier', 'ventesSommeJournalier', 'ventesSommeTotale', 'ventesSommeMois', 'venteTotale'));
+    }
+
+    public function ajouterVente(Request $request)
+    {
+        try {
+            $request->validate([
+                'client_id' => 'required|exists:users,id',
+                'date_vente' => 'required|date',
+                'produits' => 'required|array',
+                'produits.*' => 'exists:produits,id',
+                'quantites' => 'required|array',
+                'quantites.*' => 'required|integer|min:1',
+                'prix_unitaires' => 'required|array',
+                'prix_unitaires.*' => 'required|numeric|min:0',
+                'totaux' => 'required|array',
+                'totaux.*' => 'required|numeric|min:0'
+            ]);
+
+            // Créer la vente
+            $vente = new Vente();
+            $vente->client_id = $request->client_id;
+            $vente->user_id = Auth::id(); // Ajouter l'utilisateur qui effectue la vente
+            $vente->date_vente = $request->date_vente;
+            $vente->reference = $request->reference ?? 'VTE-' . date('YmdHis');
+            //$vente->description = $request->description;
+            //$vente->statut = 'completed';
+            $vente->total = array_sum($request->totaux);
+            $vente->save();
+
+            // Traiter chaque produit
+            foreach ($request->produits as $index => $produitId) {
+                $quantite = $request->quantites[$index];
+                $prixUnitaire = $request->prix_unitaires[$index];
+                $total = $request->totaux[$index];
+
+                // Récupérer les unités de produit spécifiques vendues
+                $produitUnites = ProduitUnite::where('produit_id', $produitId)
+                    ->where('statut', 'en_stock')
+                    ->take($quantite)
+                    ->get();
+
+                foreach ($produitUnites as $unite) {
+                    // Créer le détail de vente pour chaque unité
+                    $venteDetail = new VenteDetail();
+                    $venteDetail->vente_id = $vente->id;
+                    $venteDetail->produit_unite_id = $unite->id; // Utiliser l'ID de l'unité
+                    $venteDetail->prix_unitaire = $prixUnitaire;
+                    $venteDetail->total = $total / $quantite; // Prix par unité
+                    $venteDetail->save();
+
+                    // Mettre à jour le statut de l'unité
+                    $unite->statut = 'vendu';
+                    $unite->save();
+                }
+
+                // Mettre à jour le statut du produit si plus d'unités en stock
+                // Note: La table produits n'a pas de colonne statut, donc on ne met pas à jour
+                // Le statut peut être calculé à la volée via les requêtes
+                
+                // Mettre à jour le stock minimum si nécessaire
+                $produit = Produit::find($produitId);
+                $stockRestant = ProduitUnite::where('produit_id', $produitId)
+                    ->where('statut', 'en_stock')
+                    ->count();
+                
+                // Si le stock restant est inférieur au stock minimum, on pourrait alerter
+                // mais pour l'instant on ne fait rien car la table produits n'a pas de champ statut
+            }
+
+            // Ajouter l'historique
+            HistoriqueAction::create([
+                'user_id' => Auth::id(),
+                'action' => 'creation',
+                'table_concernee' => 'ventes',
+                'id_concerne' => $vente->id,
+                'details' => 'Nouvelle vente enregistrée: ' . $vente->reference
+            ]);
+
+            return redirect()->back()->with('success', 'Vente enregistrée avec succès!');
+
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Erreur lors de l\'enregistrement de la vente: ' . $e->getMessage())->withInput();
+        }
+    }
+
     public function create()
     {
         //
@@ -408,11 +500,10 @@ class ApiController extends Controller
     public function logout(Request $request)
     {
         Auth::logout();
-        
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        
-        return redirect()->route('index')->with('success', 'Déconnexion réussie');
+        return redirect()->route('login');
     }
-}
 
+  
+}

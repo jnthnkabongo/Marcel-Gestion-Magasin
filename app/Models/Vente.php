@@ -6,7 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class Vente extends Model
 {
-    protected $fillable = ['client_id', 'user_id', 'date', 'total', 'statut'];
+    protected $fillable = [
+        'client_id',
+        'user_id', 
+        'date', 
+        'total', 
+        'statut'];
 
     public function client()
     {

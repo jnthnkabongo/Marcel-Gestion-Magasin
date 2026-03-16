@@ -84,7 +84,7 @@
                         <span>Paramètres</span>
                     </a> --}}
                     
-                    <a href="#" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-200">
+                    <a href="{{ route('vente')}}" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-200">
                         <i class="fas fa-shopping-cart w-5"></i>
                         <span>Ventes</span>
                     </a>

@@ -231,7 +231,7 @@
                         <thead>
                             <tr class="text-left text-sm font-medium text-gray-700 border-b">
                                 <th class="pb-3">Marque</th>
-                                <th class="pb-3">Produits</th>
+                                <th class="pb-3">Description</th>
                                 <th class="pb-3 text-right">Actions</th>
                             </tr>
                         </thead>
@@ -300,7 +300,7 @@
                         <thead>
                             <tr class="text-left text-sm font-medium text-gray-700 border-b">
                                 <th class="pb-3">Catégorie</th>
-                                <th class="pb-3">Produits</th>
+                                <th class="pb-3">Description</th>
                                 <th class="pb-3 text-right">Actions</th>
                             </tr>
                         </thead>
