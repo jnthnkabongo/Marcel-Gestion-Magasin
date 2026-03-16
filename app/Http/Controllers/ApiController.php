@@ -61,7 +61,7 @@ class ApiController extends Controller
     public function login_api(Credentials $request){
         $credentials = $request->validated();
         
-        $this->ajouterHistoriques('login', 'Connexion de l\'utilisateur');
+        $this->ajouterHistorique('login', 'Connexion de l\'utilisateur');
 
         if (Auth::attempt($credentials)) {
             $user = Auth::user();
@@ -123,7 +123,7 @@ class ApiController extends Controller
             DB::table('users')
                 ->where('id', $userId)
                 ->update(['last_login' => now()]);
-            
+            $this->ajouterHistorique('login', 'Connexion de l\'utilisateur');
             $request->session()->regenerate();
             return redirect()->intended(route('home'))->with('success', 'Connexion réussie');
         }
@@ -141,6 +141,7 @@ class ApiController extends Controller
             'role_id' => $validated['role_id'],
         ]);
         
+        $this->ajouterHistorique('register', 'Inscription de l\'utilisateur');
         return redirect()->route('index')->with('success', 'Inscription réussie');
     }
 
