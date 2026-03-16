@@ -7,7 +7,6 @@ use App\Http\Requests\RegisterRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use App\Models\Historique;
 use App\Models\HistoriqueAction;
 use App\Models\Produit;
 use Illuminate\Support\Facades\Hash;
