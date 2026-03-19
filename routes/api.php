@@ -10,6 +10,7 @@ Route::post('/register', [ApiController::class, 'register_api']);
 Route::middleware('auth:sanctum')->group(function () {
     
     Route::post('/logout', [ApiController::class, 'logoutApi']);
+    Route::get('/dashboard', [ApiController::class, 'dashboardApi']);
     Route::get('/liste-historiques', [ApiController::class, 'getHistoriquesApi']);
     Route::get('/liste-produits', [ApiController::class, 'listeProduitsApi']);
     Route::get('/liste-utilisateurs', [ApiController::class, 'getUsersApi']);

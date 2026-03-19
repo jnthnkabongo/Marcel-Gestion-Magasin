@@ -28,7 +28,7 @@ use Illuminate\Support\Facades\DB;
 class ApiController extends Controller
 {
     /** LES FONCTIONS DE L'API */
-    
+
     //Enregistrement d'une action dans l'historique
     public function ajouterHistorique(string $action, string $description = null)
     {
@@ -101,6 +101,40 @@ class ApiController extends Controller
             'token' => $token
         ], 201);
     }
+
+    //Affichage du dashboard
+    public function dashboardApi(){
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json([
+                'message' => 'Utilisateur non authentifié'
+            ], 401);
+        }
+
+        // Ajouter l'historique sans retourner la réponse
+        $this->ajouterHistorique($user->id, 'dashboard', 'Dashboard');
+        
+        // Retourner les données du dashboard
+        $sommeUtilisateur = User::count();
+        $sommeProduit = Produit::count();
+        $sommeVente = Vente::count();
+        $sommeCategorie = Categorie::count();
+        $sommeProduitTelephones = Produit::where('categorie_id', '=', 1)->count();
+        $sommeProduitOrdinateurs = Produit::where('categorie_id', '=', 3)->count();
+        $sommeProduitAutres = Produit::where('categorie_id', '=', 4)->count();
+
+        return response()->json([
+            'message' => 'Dashboard',
+            'sommeUtilisateur' => $sommeUtilisateur,
+            'sommeProduit' => $sommeProduit,
+            'sommeVente' => $sommeVente,
+            'sommeCategorie' => $sommeCategorie,
+            'sommeProduitTelephones' => $sommeProduitTelephones,
+            'sommeProduitOrdinateurs' => $sommeProduitOrdinateurs,
+            'sommeProduitAutres' => $sommeProduitAutres
+        ], 200);
+    } 
 
     //Affichage de la liste des prouduits
     public function listeProduitsApi(){
