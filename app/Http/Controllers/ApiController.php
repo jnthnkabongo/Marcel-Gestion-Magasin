@@ -98,6 +98,48 @@ class ApiController extends Controller
         ], 201);
     }
 
+    public function listeProduitsApi(){
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json([
+                'message' => 'Utilisateur non authentifié'
+            ], 401);
+        }
+
+        // Ajouter l'historique sans retourner la réponse
+        $this->ajouterHistorique($user->id, 'liste_produits', 'Liste des produits');
+        try {
+            HistoriqueAction::create([
+                'user_id' => $user->id,
+                'action' => 'liste_produits',
+                'description' => 'Liste des produits',
+            ]);
+        } catch (\Exception $e) {
+            // Continuer même si l'historique échoue
+            Log::error('Erreur historique: ' . $e->getMessage());
+        }
+
+        $produits = Produit::orderBy('created_at', 'desc')->with('categorie', 'produitUnites', 'marque')->get();
+        return response()->json($produits);
+    }
+
+    public function getHistoriquesApi(){
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json([
+                'message' => 'utilisateur non authentifié'
+            ], 401);
+        }
+        
+        $historiques = HistoriqueAction::where(
+            'user_id', $user->id)->orderBy('created_at', 'desc')->get();
+        return response()->json([
+            'message' => 'Recuperation de toute l\'historiques',
+            'historique' => $historiques
+            ], 201);
+    }
+
     public function logout_api(Request $request){
         $request->user()->currentAccessToken()->delete();
         

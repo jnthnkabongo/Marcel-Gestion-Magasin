@@ -15,7 +15,7 @@
             border: 1px solid rgba(255, 255, 255, 0.18);
         }
         .gradient-bg {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #3B82F6 0%, #1E40AF 100%);
         }
         .input-focus {
             transition: all 0.3s ease;
@@ -136,7 +136,7 @@
                             <a href="#" class="text-sm text-purple-600 hover:text-purple-500">Mot de passe oublié?</a>
                         </div>
 
-                        <button type="submit" class="w-full bg-gradient-to-r from-purple-600 to-purple-700 text-white py-4 rounded-xl font-semibold hover:from-purple-700 hover:to-purple-800 transition-all duration-200 transform hover:scale-[1.02] shadow-lg">
+                        <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-4 rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 transition-all duration-200 transform hover:scale-[1.02] shadow-lg">
                             Se connecter
                         </button>
                     </form>
