@@ -28,6 +28,8 @@ use Illuminate\Support\Facades\DB;
 class ApiController extends Controller
 {
     /** LES FONCTIONS DE L'API */
+    
+    //Enregistrement d'une action dans l'historique
     public function ajouterHistorique(string $action, string $description = null)
     {
         $user = Auth::user();
@@ -57,6 +59,7 @@ class ApiController extends Controller
        
     }
 
+    //Se connecter avec email et mot de passe
     public function login_api(Credentials $request){
         $credentials = $request->validated();
         
@@ -79,6 +82,7 @@ class ApiController extends Controller
         ], 401);
     }
 
+    //Creation d'un utilisateur
     public function register_api(RegisterRequest $request){
         $validated = $request->validated();
         
@@ -98,6 +102,7 @@ class ApiController extends Controller
         ], 201);
     }
 
+    //Affichage de la liste des prouduits
     public function listeProduitsApi(){
         $user = Auth::user();
         if (!$user) {
@@ -126,6 +131,7 @@ class ApiController extends Controller
         ], 201);
     }
 
+    //Affichage de la liste des historiques
     public function getHistoriquesApi(){
         $user = Auth::user();
 
@@ -143,6 +149,7 @@ class ApiController extends Controller
             ], 201);
     }
 
+    //Affichage des utilisateurs
     public function getUsersApi(){
         $user = Auth::user();
         if (!$user) {
@@ -159,6 +166,7 @@ class ApiController extends Controller
         ], 201);
     }
 
+    //Affichage des roles
     public function getRolesApi(){
         $user = Auth::user();
         if (!$user) {
@@ -175,7 +183,7 @@ class ApiController extends Controller
         ], 201);
     }
     
-
+    //Deconnexion
     public function logout_api(Request $request){
         $request->user()->currentAccessToken()->delete();
         
