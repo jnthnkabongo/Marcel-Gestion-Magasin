@@ -120,7 +120,10 @@ class ApiController extends Controller
         }
 
         $produits = Produit::orderBy('created_at', 'desc')->with('categorie', 'produitUnites', 'marque')->get();
-        return response()->json($produits);
+        return response()->json([
+            'message' => 'recuperation de tous les produits',
+            'produits' => $produits
+        ], 201);
     }
 
     public function getHistoriquesApi(){
@@ -132,13 +135,46 @@ class ApiController extends Controller
             ], 401);
         }
         
-        $historiques = HistoriqueAction::where(
-            'user_id', $user->id)->orderBy('created_at', 'desc')->get();
+        $this->ajouterHistorique($user->id, 'liste_historiques', 'Liste des historiques');
+        $historiques = HistoriqueAction::with('user')->where('user_id', $user->id)->orderBy('created_at', 'desc')->get();
         return response()->json([
             'message' => 'Recuperation de toute l\'historiques',
-            'historique' => $historiques
+            'historiques' => $historiques
             ], 201);
     }
+
+    public function getUsersApi(){
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json([
+                'message' => 'utilisateur non authentifié'
+            ], 401);
+        }
+
+        $this->ajouterHistorique($user->id, 'liste_utilisateurs', 'Liste des utilisateurs');
+        $utilisateurs = User::with('role')->get();
+        return response()->json([
+            'message' => 'Recuperation de tous les utilisateurs',
+            'utilisateurs' => $utilisateurs
+        ], 201);
+    }
+
+    public function getRolesApi(){
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json([
+                'message' => 'utilisateur non authentifié'
+            ], 401);
+        }
+
+        $this->ajouterHistorique($user->id, 'liste_roles', 'Liste des roles');
+        $roles = Role::all();
+        return response()->json([
+            'message' => 'Recuperation de tous les roles',
+            'roles' => $roles
+        ], 201);
+    }
+    
 
     public function logout_api(Request $request){
         $request->user()->currentAccessToken()->delete();
