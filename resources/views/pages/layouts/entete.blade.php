@@ -54,19 +54,14 @@
                     <div class="pt-4 pb-2">
                         <h3 class="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Gestion</h3>
                     </div>
-                    
-                    <a href="#" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-200">
-                        <i class="fas fa-users w-5"></i>
-                        <span>Clients</span>
-                    </a>
-                    
+
                     <a href="#" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-200">
                         <i class="fas fa-truck w-5"></i>
                         <span>Fournisseurs</span>
                     </a>
 
                     <a href="{{ route('utilisateurs')}}" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-200">
-                        <i class="fas fa-user w-5"></i>
+                        <i class="fas fa-users w-5"></i>
                         <span>Utilisateurs</span>
                     </a>
                     

@@ -1,4 +1,4 @@
-@extends('pages.layouts.entete')
+{{-- @extends('pages.layouts.entete')
 
 @section('title', 'Ventes')
 
@@ -578,4 +578,4 @@
         }
     });
 </script>
-@endsection
+@endsection --}}

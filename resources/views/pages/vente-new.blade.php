@@ -294,16 +294,6 @@
                     </div>
                 </div>
                 
-                {{-- <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Référence</label>
-                    <input type="text" name="reference" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Référence de la vente (optionnel)">
-                </div> --}}
-                
-                {{-- <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                    <textarea name="description" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" rows="3" placeholder="Description de la vente"></textarea>
-                </div>  --}}
-                
                 <div class="border-t pt-4">
                     <h4 class="text-md font-semibold text-gray-900 mb-3">Produits</h4>
                     
@@ -469,7 +459,7 @@
         
         const container = document.getElementById('produits-container');
         const productRow = document.createElement('div');
-        productRow.className = 'grid grid-cols-5 gap-2 items-center p-3 bg-gray-50 rounded-lg';
+        productRow.className = 'grid grid-cols-5 gap-1 items-center p-3 bg-gray-50 rounded-lg';
         productRow.id = productId;
         productRow.innerHTML = `
             <div>
@@ -483,8 +473,11 @@
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Quantité</label>
-                <input type="number" name="quantites[]" min="1" max="${stockDisponible}" value="1" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 quantite-input" required>
-                <div class="text-xs text-gray-500">Max: ${stockDisponible}</div>
+                <input type="number" name="quantites[]" min="1" max="${stockDisponible}" value="1" class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 readonly>
+                
+                <div class="text-xs text-blue-600">
+                    <i class="fas fa-box"></i>Stock disponible: 
+                </div>
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Prix unitaire</label>

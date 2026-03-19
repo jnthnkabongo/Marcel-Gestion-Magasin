@@ -87,9 +87,7 @@
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    <input type="checkbox" class="rounded border-gray-300">
-                                </th>
+                               
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Catégorie
                                 </th>
@@ -101,6 +99,9 @@
                                 </th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Modéle
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Statut
                                 </th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Numéro série
@@ -117,9 +118,6 @@
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider col-prix-vente">
                                     Prix de vente
                                 </th>
-                                {{-- <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider col-stock">
-                                    Stock minimum
-                                </th> --}}
                                 <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider col-actions">
                                     Actions
                                 </th>
@@ -128,21 +126,19 @@
                         <tbody class="bg-white divide-y divide-gray-200">
                             @forelse ($produits as $produit)
                                 <tr class="hover:bg-gray-50">
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <input type="checkbox" class="rounded border-gray-300" value="{{ $produit->id }}">
-                                    </td>
+                                    
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="flex items-center">
                                             <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center mr-3">
                                                 <i class="fas fa-box text-gray-600 text-sm"></i>
                                             </div>
                                             <div>
-                                                <div class="text-sm font-medium text-gray-900">{{ $produit->categorie->nom }}</div>
+                                                <div class="text-sm font-medium text-gray-900">{{ \Illuminate\Support\Str::limit($produit->categorie->nom, 10, '...') }}</div>
                                                 <div class="text-xs text-gray-500">ID: {{ $produit->id }}</div>
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 w-24 truncate">
                                         {{ $produit->categorie ? $produit->marque->nom : 'Non défini' }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -154,6 +150,41 @@
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                             {{ $produit->modele ?? 'Non défini' }}
                                         
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        @if($produit->produitUnites && $produit->produitUnites->isNotEmpty())
+                                            @php
+                                                $firstUnite = $produit->produitUnites->first();
+                                                $statut = $firstUnite->statut;
+                                            @endphp
+                                            
+                                            @switch($statut)
+                                                @case('en_stock')
+                                                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                                        En Stock
+                                                    </span>
+                                                    @break
+                                                @case('vendu')
+                                                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                                        Vendu
+                                                    </span>
+                                                    @break
+                                                @case('defectueux')
+                                                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                                        Défectueux
+                                                    </span>
+                                                    @break
+                                                
+                                                @default
+                                                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                                                        {{ $statut }}
+                                                    </span>
+                                            @endswitch
+                                        @else
+                                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                                                Aucune unité
+                                            </span>
+                                        @endif
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                         {{ $produit->produitUnites && $produit->produitUnites->isNotEmpty() ? $produit->produitUnites->first()->numero_serie : 'Aucun' }}
