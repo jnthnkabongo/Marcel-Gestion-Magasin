@@ -167,7 +167,7 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                     {{ \Carbon\Carbon::parse($vente->date_vente)->format('d/m/Y') }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                {{-- <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="flex items-center">
                                         <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center mr-3">
                                             <i class="fas fa-user text-gray-600 text-xs"></i>
@@ -181,6 +181,10 @@
                                             </div>
                                         </div>
                                     </div>
+                                </td> --}}
+
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    {{ $vente->nom_client}}
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-900">
                                     <div class="max-w-xs">
@@ -287,6 +291,10 @@
                                 @endforeach
                             @endif
                         </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nom du client</label>
+                        <input type="text" name="nom_client" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Nom du client (optionnel)">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Date de vente</label>
@@ -473,10 +481,10 @@
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Quantité</label>
-                <input type="number" name="quantites[]" min="1" max="${stockDisponible}" value="1" class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 readonly>
+                <input type="number" name="quantites[]" min="1" max="${stockDisponible}" value="1" class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 readonly">
                 
                 <div class="text-xs text-blue-600">
-                    <i class="fas fa-box"></i>Stock disponible: 
+                 
                 </div>
             </div>
             <div>

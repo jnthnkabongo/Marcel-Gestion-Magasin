@@ -97,7 +97,7 @@
                         <h3 class="text-xl font-bold text-gray-800">Ventes du jour</h3>
                         <div class="flex items-center space-x-3">
                             <span class="text-sm text-gray-500">Total aujourd'hui:</span>
-                            <span class="text-lg font-bold text-green-600">0 FCFA</span>
+                            <span class="text-lg font-bold text-green-600">{{ $totalVentesAujourdhui }} $</span>
                         </div>
                     </div>
                 </div>
@@ -116,7 +116,13 @@
                                     Produits
                                 </th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Quantité
+                                    Catégorie
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Modèle
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Nom
                                 </th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Total
@@ -127,20 +133,103 @@
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Heure
                                 </th>
+                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Date
+                                </th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Actions
                                 </th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200" id="salesTableBody">
-                            <!-- Les ventes du jour seront chargées ici -->
-                            <tr>
-                                <td colspan="8" class="px-6 py-8 text-center text-gray-500">
-                                    <i class="fas fa-shopping-cart text-4xl mb-3 text-gray-300"></i>
-                                    <p>Aucune vente aujourd'hui</p>
-                                    <p class="text-sm">Les ventes apparaîtront ici dès qu'elles seront enregistrées</p>
-                                </td>
-                            </tr>
+                                @forelse($ventes as $vente)
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                        #{{ $vente->id }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        <div class="flex items-center">
+                                            <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                                                <i class="fas fa-user text-blue-600 text-sm"></i>
+                                            </div>
+                                            <div>
+                                                {{-- <div class="font-medium text-gray-900">{{ $vente->client->nom ?? 'Client inconnu' }}</div> --}}
+                                                <div class="font-medium text-gray-900">{{ $vente->nom_client ?? 'Client inconnu'}}</div>
+                                                <div class="text-xs text-gray-500">ID: {{ $vente->client_id }}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                            {{ $vente->venteDetails->count() }} produits
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        {{ $vente->venteDetails->first()->produitUnite && $vente->venteDetails->first()->produitUnite->produit && $vente->venteDetails->first()->produitUnite->produit->categorie ? $vente->venteDetails->first()->produitUnite->produit->categorie->nom : 'Non défini' }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        {{ $vente->venteDetails->first()->produitUnite && $vente->venteDetails->first()->produitUnite->produit ? $vente->venteDetails->first()->produitUnite->produit->modele : 'Non défini' }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full">
+                                            {{ $vente->venteDetails->first()->produitUnite && $vente->venteDetails->first()->produitUnite->produit ? 
+                                            $vente->venteDetails->first()->produitUnite->produit->nom : 'Non défini' }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                                        {{ number_format($vente->total, 0, ',', ' ') }} $
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        @switch($vente->statut)
+                                            @case('terminé')
+                                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                                    Terminé
+                                                </span>
+                                                @break
+                                            @case('en_cours')
+                                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                                    En cours
+                                                </span>
+                                                @break
+                                            @case('annulé')
+                                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                                    Annulé
+                                                </span>
+                                                @break
+                                            @default
+                                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                                                    {{ $vente->statut }}
+                                                </span>
+                                        @endswitch
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        <div class="flex items-center">
+                                            <i class="fas fa-clock text-gray-400 mr-2"></i>
+                                            {{ $vente->created_at->format('H:i') }}
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        <div class="flex items-center">
+                                            <i class="fas fa-clock text-gray-400 mr-2"></i>
+                                            {{ $vente->created_at->format('d/m/Y') }}
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <button onclick="showVenteDetails({{ $vente->id }})" class="px-3 py-1 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600 transition-colors duration-200">
+                                            <i class="fas fa-eye mr-1"></i>
+                                            Voir
+                                        </button>
+                                    </td>
+                                </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="8" class="px-6 py-8 text-center text-gray-500">
+                                            <i class="fas fa-shopping-cart text-4xl mb-3 text-gray-300"></i>
+                                            <p>Aucune vente aujourd'hui</p>
+                                            <p class="text-sm">Les ventes apparaîtront ici dès qu'elles seront enregistrées</p>
+                                        </td>
+                                    </tr>
+                                @endforelse
                         </tbody>
                     </table>
                 </div>

@@ -270,8 +270,11 @@ class ApiController extends Controller
         $totalProduts = Produit::count();
         $totalVentes = Vente::count();
         $totalClients = Client::count();
+        $ventes = Vente::with(['client', 'venteDetails.produitUnite.produit'])->orderBy('created_at', 'desc')->paginate('10');
+        $totalVentesAujourdhui = Vente::whereDate('created_at', today())->sum('total');
+
         $this->ajouterHistorique('dashboard', 'consultation', 'Dashboard');
-        return view('pages.dashboard', compact('totalUtilisateurs', 'totalProduts', 'totalVentes', 'totalClients'));
+        return view('pages.dashboard', compact('totalUtilisateurs', 'totalProduts', 'totalVentes', 'totalClients','ventes','totalVentesAujourdhui'));
     }
 
     // public function listeHistoriques()
@@ -485,7 +488,8 @@ class ApiController extends Controller
         $ventesSommeTotale = Vente::sum('total');
         $venteTotale = Vente::count();
         $ventesSommeMois = Vente::whereMonth('created_at', now()->month)->sum('total');
-        return view('pages.vente-new', compact('liste_produits', 'clients', 'ventes', 'venteJournalier', 'ventesSommeJournalier', 'ventesSommeTotale', 'ventesSommeMois', 'venteTotale'));
+        $totalVentesAujourdhui = Vente::whereDate('created_at', today())->sum('total');
+        return view('pages.vente-new', compact('liste_produits', 'clients', 'ventes', 'venteJournalier', 'ventesSommeJournalier', 'ventesSommeTotale', 'ventesSommeMois', 'venteTotale', 'totalVentesAujourdhui'));
     }
 
     public function ajouterVente(Request $request)
@@ -493,6 +497,7 @@ class ApiController extends Controller
         try {
             $request->validate([
                 'client_id' => 'required|exists:users,id',
+                'nom_client' => 'required|string|max:255',
                 'date_vente' => 'required|date',
                 'produits' => 'required|array',
                 'produits.*' => 'exists:produits,id',
@@ -507,6 +512,7 @@ class ApiController extends Controller
             // Créer la vente
             $vente = new Vente();
             $vente->client_id = $request->client_id;
+            $vente->nom_client = $request->nom_client;
             $vente->user_id = Auth::id(); // Ajouter l'utilisateur qui effectue la vente
             $vente->date_vente = $request->date_vente;
             $vente->reference = $request->reference ?? 'VTE-' . date('YmdHis');

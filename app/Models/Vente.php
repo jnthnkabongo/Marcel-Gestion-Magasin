@@ -9,6 +9,7 @@ class Vente extends Model
     protected $fillable = [
         'client_id',
         'user_id', 
+        'nom_client',
         'date', 
         'total', 
         'statut'];
