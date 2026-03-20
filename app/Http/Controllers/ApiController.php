@@ -158,10 +158,28 @@ class ApiController extends Controller
             Log::error('Erreur historique: ' . $e->getMessage());
         }
 
-        $produits = Produit::orderBy('created_at', 'desc')->with('categorie', 'produitUnites', 'marque')->get();
+        $produits = Produit::with('categorie', 'produitUnites', 'marque')->orderBy('created_at', 'desc')->get();
         return response()->json([
             'message' => 'recuperation de tous les produits',
             'produits' => $produits
+        ], 201);
+    }
+
+    public function listeVenteApi(){
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json([
+                'message' => 'Utilisateur non authentifié'
+            ], 401);
+        }
+
+        // Ajouter l'historique sans retourner la réponse
+        $this->ajouterHistorique($user->id, 'liste_vente', 'Liste des ventes');
+
+        $ventes = Vente::with(['client', 'venteDetails.produitUnite.produit'])->orderBy('created_at', 'desc')->get();
+        return response()->json([
+            'message' => 'recuperation de toutes les ventes',
+            'ventes' => $ventes
         ], 201);
     }
 

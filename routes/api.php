@@ -13,6 +13,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/dashboard', [ApiController::class, 'dashboardApi']);
     Route::get('/liste-historiques', [ApiController::class, 'getHistoriquesApi']);
     Route::get('/liste-produits', [ApiController::class, 'listeProduitsApi']);
+    Route::get('/liste-vente', [ApiController::class, 'listeVenteApi']);
     Route::get('/liste-utilisateurs', [ApiController::class, 'getUsersApi']);
     Route::get('liste-roles', [ApiController::class, 'getRolesApi']);
 });
