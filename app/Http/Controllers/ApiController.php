@@ -147,16 +147,6 @@ class ApiController extends Controller
 
         // Ajouter l'historique sans retourner la réponse
         $this->ajouterHistorique($user->id, 'liste_produits', 'Liste des produits');
-        try {
-            HistoriqueAction::create([
-                'user_id' => $user->id,
-                'action' => 'liste_produits',
-                'description' => 'Liste des produits',
-            ]);
-        } catch (\Exception $e) {
-            // Continuer même si l'historique échoue
-            Log::error('Erreur historique: ' . $e->getMessage());
-        }
 
         $produits = Produit::with('categorie', 'produitUnites', 'marque')->orderBy('created_at', 'desc')->get();
         return response()->json([
