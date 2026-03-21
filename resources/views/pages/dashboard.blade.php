@@ -3,8 +3,6 @@
 @section('content')
 <!-- Main content -->
     <div class="flex-1 flex flex-col overflow-hidden">
-
-
         <!-- Main content area -->
         <main class="flex-1 overflow-y-auto p-6">
             <!-- Welcome section -->
@@ -236,6 +234,11 @@
                 
                 <!-- Pagination -->
                 <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+                    @if(isset($ventes) && $ventes->hasPages())
+                        <div class="px-6 py-4 border-t border-gray-200">
+                            {{ $ventes->links() }}
+                        </div>
+                    @endif
                     <div class="text-sm text-gray-700">
                         Affichage de <span class="font-medium">0</span> à <span class="font-medium">0</span> sur <span class="font-medium">0</span> résultats
                     </div>

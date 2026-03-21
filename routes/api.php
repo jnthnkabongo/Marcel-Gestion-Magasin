@@ -16,4 +16,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/liste-vente', [ApiController::class, 'listeVenteApi']);
     Route::get('/liste-utilisateurs', [ApiController::class, 'getUsersApi']);
     Route::get('liste-roles', [ApiController::class, 'getRolesApi']);
+    Route::post('/vente-produit', [ApiController::class, 'venteProduitApi']);
 });

@@ -1,7 +1,7 @@
 @extends('pages.layouts.entete')
 
 @section('content')
-<div class="flex h-screen bg-gray-50">
+<div class="flex-1 flex flex-col overflow-hidden">
 
     <!-- Main Content -->
     <main class="flex-1 overflow-y-auto p-6">

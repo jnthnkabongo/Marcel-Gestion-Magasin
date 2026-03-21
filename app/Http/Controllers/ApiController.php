@@ -118,7 +118,7 @@ class ApiController extends Controller
         // Retourner les données du dashboard
         $sommeUtilisateur = User::count();
         $sommeProduit = Produit::count();
-        $sommeVente = Vente::count();
+        $sommeVente = VenteDetail::count();
         $sommeCategorie = Categorie::count();
         $sommeProduitTelephones = Produit::where('categorie_id', '=', 1)->count();
         $sommeProduitOrdinateurs = Produit::where('categorie_id', '=', 3)->count();
@@ -146,7 +146,7 @@ class ApiController extends Controller
         }
 
         // Ajouter l'historique sans retourner la réponse
-        $this->ajouterHistorique($user->id, 'liste_produits', 'Liste des produits');
+        $this->ajouterHistorique('liste_produits_application ' . $user->name , 'liste_produits', 'Liste des produits');
 
         $produits = Produit::with('categorie', 'produitUnites', 'marque')->orderBy('created_at', 'desc')->get();
         return response()->json([
@@ -164,7 +164,7 @@ class ApiController extends Controller
         }
 
         // Ajouter l'historique sans retourner la réponse
-        $this->ajouterHistorique($user->id, 'liste_vente', 'Liste des ventes');
+        $this->ajouterHistorique('liste_vente_application', 'liste_vente', 'Liste des ventes');
 
         $ventes = Vente::with(['client', 'venteDetails.produitUnite.produit'])->orderBy('created_at', 'desc')->get();
         return response()->json([
@@ -183,7 +183,7 @@ class ApiController extends Controller
             ], 401);
         }
         
-        $this->ajouterHistorique($user->id, 'liste_historiques', 'Liste des historiques');
+        $this->ajouterHistorique('liste_historique_application', 'liste_historiques', 'Liste des historiques');
         $historiques = HistoriqueAction::with('user')->where('user_id', $user->id)->orderBy('created_at', 'desc')->get();
         return response()->json([
             'message' => 'Recuperation de toute l\'historiques',
@@ -200,7 +200,7 @@ class ApiController extends Controller
             ], 401);
         }
 
-        $this->ajouterHistorique($user->id, 'liste_utilisateurs', 'Liste des utilisateurs');
+        $this->ajouterHistorique('liste_utilisateur_application', 'liste_utilisateurs', 'Liste des utilisateurs');
         $utilisateurs = User::with('role')->get();
         return response()->json([
             'message' => 'Recuperation de tous les utilisateurs',
@@ -217,12 +217,94 @@ class ApiController extends Controller
             ], 401);
         }
 
-        $this->ajouterHistorique($user->id, 'liste_roles', 'Liste des roles');
+        $this->ajouterHistorique('liste_role_application'.$user->id , 'liste_roles', 'Liste des roles');
         $roles = Role::all();
         return response()->json([
             'message' => 'Recuperation de tous les roles',
             'roles' => $roles
         ], 201);
+    }
+
+    //Effectuer une vente 
+    public function venteProduitApi(Request $request){
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json([
+                'message' => 'utilisateur non authentifié'
+            ], 401);
+        }
+        try {
+            $request->validate([
+                'client_id' => 'required|exists:users,id',
+                'nom_client' => 'required|string|max:255',
+                'date_vente' => 'required|date',
+                'produits' => 'required|array',
+                'quantites' => 'required|array',
+                'prix_unitaires' => 'required|array',
+                'totaux' => 'required|array'
+            ]);
+
+            // Créer la vente
+            $vente = new Vente();
+            $vente->client_id = $request->client_id;
+            $vente->nom_client = $request->nom_client;
+            $vente->user_id = Auth::id();
+            $vente->date_vente = $request->date_vente;
+            $vente->reference = $request->reference ?? 'VTE-' . date('YmdHis');
+            $vente->total = array_sum($request->totaux);
+            $vente->statut = 'paye';
+            $vente->save();
+
+            // Traiter chaque produit
+            foreach ($request->produits as $index => $produitId) {
+                $quantite = $request->quantites[$index];
+                $prixUnitaire = $request->prix_unitaires[$index];
+                $total = $request->totaux[$index];
+
+                // Récupérer les unités de produit spécifiques disponibles
+                $produitUnites = ProduitUnite::where('produit_id', $produitId)
+                    ->where('statut', 'en_stock')
+                    ->take($quantite)
+                    ->get();
+
+                foreach ($produitUnites as $unite) {
+                    // Créer le détail de vente pour chaque unité
+                    $venteDetail = new VenteDetail();
+                    $venteDetail->vente_id = $vente->id;
+                    $venteDetail->produit_unite_id = $unite->id;
+                    $venteDetail->prix_unitaire = $prixUnitaire;
+                    $venteDetail->total = $total / $quantite; // Prix par unité
+                    $venteDetail->save();
+
+                    // Mettre à jour le statut de l'unité
+                    $unite->statut = 'vendu';
+                    $unite->save();
+                }
+            }
+
+            // Ajouter l'historique
+            $this->ajouterHistorique('vente_application ' . $user->id, 'creation', 'Vente de produits');
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Vente effectuée avec succès',
+                'vente' => $vente->load(['client', 'venteDetails.produitUnite.produit'])
+            ], 201);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur de validation',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Throwable $th) {
+            Log::error('Erreur vente: ' . $th->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de la vente: ' . $th->getMessage()
+            ], 500);
+        }
     }
     
     //Deconnexion
@@ -276,7 +358,7 @@ class ApiController extends Controller
     {
         $totalUtilisateurs = User::count();
         $totalProduts = Produit::count();
-        $totalVentes = Vente::count();
+        $totalVentes = VenteDetail::count();
         $totalClients = Client::count();
         $ventes = Vente::with(['client', 'venteDetails.produitUnite.produit'])->orderBy('created_at', 'desc')->paginate('10');
         $totalVentesAujourdhui = Vente::whereDate('created_at', today())->sum('total');
@@ -348,7 +430,7 @@ class ApiController extends Controller
                 $query->select('id', 'produit_id', 'numero_serie', 'statut', 'created_at');
             }, 'approvisionnementDetails'])
             ->orderBy('created_at', 'desc')
-            ->paginate('7');
+            ->paginate('10');
         $categories = Categorie::orderBy('created_at','desc')->get();
         $marques = Marque::orderBy('created_at','desc')->get();
         return view('pages.liste-produit', compact('produits', 'categories', 'marques', 'totalProduit', 'totalProduitStock', 'totalProduitStockVendu'));
@@ -497,6 +579,9 @@ class ApiController extends Controller
         $venteTotale = Vente::count();
         $ventesSommeMois = Vente::whereMonth('created_at', now()->month)->sum('total');
         $totalVentesAujourdhui = Vente::whereDate('created_at', today())->sum('total');
+        
+        $this->ajouterHistorique('liste_vente', 'consultation', 'Page de vente');
+        
         return view('pages.vente-new', compact('liste_produits', 'clients', 'ventes', 'venteJournalier', 'ventesSommeJournalier', 'ventesSommeTotale', 'ventesSommeMois', 'venteTotale', 'totalVentesAujourdhui'));
     }
 

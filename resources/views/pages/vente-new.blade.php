@@ -1,9 +1,7 @@
 @extends('pages.layouts.entete')
 
-@section('title', 'Ventes')
-
 @section('content')
-<div class="flex h-screen bg-gray-50">
+<div class="flex-1 flex flex-col overflow-hidden">
     <!-- Main Content -->
     <main class="flex-1 overflow-y-auto p-6">
         <!-- Messages de notification -->
@@ -259,13 +257,15 @@
             </div>
 
             <!-- Pagination -->
-            @if(isset($ventes) && $ventes->hasPages())
+            @if($ventes->hasPages())
                 <div class="px-6 py-4 border-t border-gray-200">
                     {{ $ventes->links() }}
                 </div>
             @endif
         </div>
     </main>
+    <div class="mb-10"></div>
+
 </div>
 
 <!-- Modal Nouvelle Vente -->
