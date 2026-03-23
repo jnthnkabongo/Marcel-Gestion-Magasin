@@ -54,9 +54,24 @@ class ApiController extends Controller
 
         return response()->json([
             'message' => 'Historique ajouté avec succès',
-            'historique' => $historique
         ], 201);
        
+    }
+
+    private function ajouterHistoriqueAction($action, $type, $description) {
+        $user = Auth::user();
+        try {
+            // Créer directement l'enregistrement dans l'historique
+            \App\Models\HistoriqueAction::create([
+                'user_id' => $user->id,
+                'action' => $action,
+                'type' => $type,
+                'description' => $description,
+            ]);
+        } catch (\Exception $e) {
+            // En cas d'erreur, on ne fait rien pour ne pas bloquer l'application
+            Log::error('Erreur lors de l\'ajout à l\'historique: ' . $e->getMessage());
+        }
     }
 
     //Se connecter avec email et mot de passe
@@ -84,7 +99,10 @@ class ApiController extends Controller
 
     //Creation d'un utilisateur
     public function register_api(RegisterRequest $request){
-        $validated = $request->validated();
+       
+        $validated = $request->validated(
+
+        );
         
         $user = User::create([
             'name' => $validated['name'],
@@ -94,6 +112,9 @@ class ApiController extends Controller
         ]);
         
         $token = $user->createToken('auth-token')->plainTextToken;
+        
+        // Ajouter l'historique
+        $this->ajouterHistorique('register', 'creation', 'Inscription de l\'utilisateur: ' . $user->name);
         
         return response()->json([
             'message' => 'Inscription réussie',
@@ -321,6 +342,13 @@ class ApiController extends Controller
      */
     public function index()
     {
+        //    User::create([
+        //     'name' => 'Jonathan kabongo',
+        //     'email' => 'jnthnkabongo@gmail.com',
+        //     'role_id' => 1,
+        //     'password' => Hash::make('1234567'),
+
+        // ]);
         return view('pages.auth');
     }
 
@@ -395,12 +423,13 @@ class ApiController extends Controller
 
     public function listeUtilisateurs()
     {
-        $users = User::with('role')->get();
+        $users = User::with('role')->paginate('10');
         $administrateurs = User::where('role_id', 1)->count();
+        $roles = Role::orderBy('created_at', 'desc')->get();
 
         $this->ajouterHistorique('liste-utilisateurs', 'consultation', 'Liste des utilisateurs');
 
-        return view('pages.liste-utilisateur', compact('users', 'administrateurs'));
+        return view('pages.liste-utilisateur', compact('users', 'administrateurs', 'roles'));
     }
 
     public function listeProduits()
@@ -434,6 +463,45 @@ class ApiController extends Controller
         $categories = Categorie::orderBy('created_at','desc')->get();
         $marques = Marque::orderBy('created_at','desc')->get();
         return view('pages.liste-produit', compact('produits', 'categories', 'marques', 'totalProduit', 'totalProduitStock', 'totalProduitStockVendu'));
+    }
+
+    public function AjoutUtilisateur(RegisterRequest $request){
+        //dd($request->all());
+        $validated = $request->validated();
+        // $validated = $request->validate([
+        //     'name' => 'required|string|max:255',
+        //     'email' => 'required|string|email|max:255|unique:users',
+        //     'password' => 'required|string|min:8',
+        //     'role_id' => 'required|exists:roles,id'
+        // ]);
+
+        $user = new User();
+        $user->name = $validated['name'];
+        $user->email = $validated['email'];
+        $user->password = bcrypt($validated['password']);
+        $user->role_id = $validated['role_id'];
+        $user->save();
+
+        $this->ajouterHistorique('ajout-utilisateur', 'creation', 'Ajout d\'un utilisateur');
+        
+        return redirect()->route('utilisateurs')->with('success', 'Utilisateur ajouté avec succès');
+    }
+
+    public function suppressionUtilisateur($id){
+        try {
+            $user = User::findOrFail($id);
+            
+            // Ajouter l'historique avant suppression
+            $this->ajouterHistorique('suppression-utilisateur', 'suppression', 'Suppression de l\'utilisateur: ' . $user->name);
+            
+            // Supprimer l'utilisateur
+            $user->delete();
+            
+            return redirect()->route('utilisateurs')->with('success', 'Utilisateur supprimé avec succès');
+            
+        } catch (\Exception $e) {
+            return redirect()->route('utilisateurs')->with('error', 'Erreur lors de la suppression: ' . $e->getMessage());
+        }
     }
 
     public function ajoutMarque(Request $request)

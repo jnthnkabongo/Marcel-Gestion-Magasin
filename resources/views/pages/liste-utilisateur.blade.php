@@ -11,11 +11,30 @@
                         <h1 class="text-3xl font-bold text-gray-900 mb-2">Gestion des utilisateurs</h1>
                         <p class="text-gray-600">Consultez et gérez tous les utilisateurs du système</p>
                     </div>
-                    <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center">
+                    <button onclick="openModal('modalNouveauUtilisateur')" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center">
                         <i class="fas fa-plus mr-2"></i>
                         Nouvel utilisateur
                     </button>
                 </div>
+                
+                <!-- Messages de notification -->
+                @if(session('success'))
+                    <div class="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-check-circle mr-2"></i>
+                            <span>{{ session('success') }}</span>
+                        </div>
+                    </div>
+                @endif
+                
+                @if(session('error'))
+                    <div class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-exclamation-triangle mr-2"></i>
+                            <span>{{ session('error') }}</span>
+                        </div>
+                    </div>
+                @endif
             </div>
 
             <!-- Stats cards -->
@@ -144,13 +163,34 @@
                                         {{ $user->last_login ? $user->last_login->format('d/m/Y H:i') : 'Jamais' }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <a href="#" class="text-indigo-600 hover:text-indigo-900 mr-3">Voir</a>
-                                        <a href="#" class="text-gray-600 hover:text-gray-900 mr-3">Modifier</a>
-                                        {{-- <form action="{{ route('users.destroy', $user->id) }}" method="POST" style="display: inline;">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="text-red-600 hover:text-red-900" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')">Supprimer</button>
-                                        </form> --}}
+                                        <div class="flex justify-end space-x-1"> 
+                                             <a class="px-3 py-1 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600 transition-colors duration-200" href="#">
+                                                <i class="fas fa-eye mr-1"></i>
+                                                Voir
+                                            </a>
+                                            <a class="px-3 py-1 bg-orange-500 text-white rounded-md text-sm hover:bg-orange-600 transition-colors duration-200" href="#">
+                                                <i class="fas fa-edit mr-1"></i>
+                                                Modifier
+                                            </a>
+                                            <form action="{{ route('utilisateurs.suppression', $user->id) }}" method="POST">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="px-3 py-1 bg-red-500 text-white rounded-md text-sm hover:bg-red-600 transition-colors duration-200" onclick="event.preventDefault(); confirmSuppression({{ $user->id }}, '{{ $user->name }}')">Supprimer</button>
+                                                @if(session('success'))
+                                                <script>
+                                                    setTimeout(function() {
+                                                        swal({
+                                                            text: "{{ session('success') }}",
+                                                            icon: "success",
+                                                            timer: 3000,
+                                                            buttons: false
+                                                        });
+                                                    }, 500);
+                                                </script>
+                                                @endif
+                                            </form>
+                                        </div>
+                                       
                                     </td>
                                 </tr>
                             @empty
@@ -174,5 +214,112 @@
                 @endif --}}
             </div>
         </main>
+        <div class="mb-10"></div>
     </div>
+
+    <!-- Modal Nouveau Utilisateur-->
+    <div id="modalNouveauUtilisateur" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
+        <div class="relative top-10 mx-auto p-6 border w-[800px] shadow-lg rounded-md bg-white max-h-[150vh] overflow-y-auto">
+            <div class="mt-3">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-bold text-gray-900">Nouveau Utilisateur</h3>
+                    <button onclick="closeModal('modalNouveauUtilisateur')" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <form class="space-y-4" method="POST" action="{{ route('utilisateurs.ajout')}}">
+                    @csrf
+                    <div class="grid grid-cols-1 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nom complet utilisateur</label>
+                            <input type="text" name="name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Entrez le nom" required>
+                        </div>
+                         <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">E-mail utilisateur</label>
+                            <input type="email" name="email" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Entrez l'e-mail" required>
+                        </div>
+                         <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Mot de passe</label>
+                            <input type="password" name="password" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Entrez le mot de passe" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Rôle</label>
+                            <select name="role_id" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                                <option value="">Sélectionner le rôle</option>
+                                @foreach ($roles as $role)
+                                    <option value="{{ $role->id }}">{{ $role->nom }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                    
+                    
+                   
+                    <div class="flex justify-end space-x-3 pt-4">
+                        <button type="button" onclick="closeModal('modalNouveauUtilisateur')" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
+                            Annuler
+                        </button>
+                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                            Enregistrer
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+       <script>
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('hidden');
+                document.body.classList.add('overflow-hidden');
+            }
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.add('hidden');
+                document.body.classList.remove('overflow-hidden');
+            }
+        }
+
+        // Fermer les modals en cliquant à l'extérieur
+        document.addEventListener('click', function(event) {
+            if (event.target.classList.contains('bg-opacity-50')) {
+                const modals = ['modalNouveauUtilisateur']; // Uniquement les modals qui existent
+                modals.forEach(modalId => {
+                    const modal = document.getElementById(modalId);
+                    if (modal && !modal.classList.contains('hidden')) { // Vérifier si modal existe
+                        closeModal(modalId);
+                    }
+                });
+            }
+        });
+
+        // Fonction de confirmation avec SweetAlert2
+        function confirmSuppression(userId, userName) {
+            Swal.fire({
+                title: 'Confirmation de suppression',
+                text: `Êtes-vous sûr de vouloir supprimer l'utilisateur "${userName}" ?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Oui, supprimer',
+                cancelButtonText: 'Annuler',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Soumettre le formulaire de suppression
+                    const form = document.querySelector(`form[action*="${userId}"]`);
+                    if (form) {
+                        form.submit();
+                    }
+                }
+            });
+        }
+    </script>
 @endsection

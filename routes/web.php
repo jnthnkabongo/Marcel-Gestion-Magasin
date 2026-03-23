@@ -8,6 +8,8 @@ Route::post('/soumission-login', [ApiController::class, 'login'])->name('soumiss
 Route::post('/creation-compte', [ApiController::class, 'register'])->name('creation-compte');
 Route::get('/dashboard', [ApiController::class, 'dashboard'])->name('home');
 Route::get('/utilisateurs', [ApiController::class, 'listeUtilisateurs'])->name('utilisateurs');
+Route::post('/utilisateur/ajout', [ApiController::class, 'ajoutUtilisateur'])->name('utilisateurs.ajout');
+Route::delete('/utilisateur/suppression/{id}', [ApiController::class, 'suppressionUtilisateur'])->name('utilisateurs.suppression');
 Route::get('/produits', [ApiController::class, 'listeProduits'])->name('produits');
 Route::get('/historiques', [ApiController::class, 'historiques'])->name('historiques');
 Route::post('/produit/ajout', [ApiController::class, 'ajoutProduit'])->name('produits.ajout');

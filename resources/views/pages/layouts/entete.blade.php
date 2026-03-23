@@ -7,6 +7,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
     <style>
         .sidebar-item:hover {
@@ -136,8 +139,8 @@
                         <div class="relative">
                             <button onclick="toggleDropdown(event)" class="flex items-center space-x-3 hover:bg-gray-100 rounded-lg px-3 py-2 transition-colors">
                                 <div class="text-right hidden sm:block">
-                                    <p class="text-sm font-medium text-gray-700" id="topUserName">Utilisateur</p>
-                                    <p class="text-xs text-gray-500">En ligne</p>
+                                    <p class="text-sm font-medium text-gray-700">{{ auth()->user()->name ?? 'Utilisateur' }}</p>
+                                    <p class="text-xs text-gray-500">{{ auth()->user()->email ?? 'En ligne' }}</p>
                                 </div>
                                 <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
                                     <i class="fas fa-user text-gray-600 text-sm"></i>

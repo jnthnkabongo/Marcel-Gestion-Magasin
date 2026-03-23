@@ -111,9 +111,6 @@
                                     Client
                                 </th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Produits
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Catégorie
                                 </th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -156,11 +153,6 @@
                                                 <div class="text-xs text-gray-500">ID: {{ $vente->client_id }}</div>
                                             </div>
                                         </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                                            {{ $vente->venteDetails->count() }} produits
-                                        </span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                         {{ $vente->venteDetails->first()->produitUnite && $vente->venteDetails->first()->produitUnite->produit && $vente->venteDetails->first()->produitUnite->produit->categorie ? $vente->venteDetails->first()->produitUnite->produit->categorie->nom : 'Non défini' }}

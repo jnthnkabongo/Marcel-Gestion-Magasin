@@ -9,6 +9,7 @@ class HistoriqueAction extends Model
     protected $fillable = [
         'user_id', 
         'action', 
+        'type',
         'description', 
     ];
 
