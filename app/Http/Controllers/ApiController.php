@@ -24,13 +24,15 @@ use App\Models\Garantie;
 use App\Models\Paiement;
 use App\Models\ApprovisionnementDetail;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Carbon;
+
 
 class ApiController extends Controller
 {
     /** LES FONCTIONS DE L'API */
 
     //Enregistrement d'une action dans l'historique
-    public function ajouterHistorique(string $action, string $description = null)
+    public function ajouterHistorique(string $action, string $type,string $description = null)
     {
         $user = Auth::user();
 
@@ -40,15 +42,16 @@ class ApiController extends Controller
             ], 401);
         }
 
-        if (is_null($user->role) || $user->role->nom !== 'admin') {
-            return response()->json([
-                'message' => 'Accès refusé - rôle admin requis'
-            ], 403);
-        }
+        // if (is_null($user->role) || $user->role->nom !== 'admin') {
+        //     return response()->json([
+        //         'message' => 'Accès refusé - rôle admin requis'
+        //     ], 403);
+        // }
 
         $historique = HistoriqueAction::create([
             'user_id' => $user->id,
             'action' => $action,
+            'type' => $type,
             'description' => $description ?? 'Action effectuée',
         ]);
 
@@ -58,19 +61,51 @@ class ApiController extends Controller
        
     }
 
-    private function ajouterHistoriqueAction($action, $type, $description) {
-        $user = Auth::user();
+    // private function ajouterHistoriqueAction($action, $type, $description) {
+    //     $user = Auth::user();
+        
+    //     if (!$user) {
+    //         return response()->json([
+    //             'message' => 'Utilisateur non autorisé'
+    //         ], 401);
+    //     }
+    //     try {
+    //         // Créer directement l'enregistrement dans l'historique
+    //         $historique = HistoriqueAction::create([
+    //             'user_id' => $user->id,
+    //             'action' => $action,
+    //             'type' => $type,
+    //             'description' => $description,
+    //         ]);
+    //     } catch (\Exception $e) {
+    //         // En cas d'erreur, on ne fait rien pour ne pas bloquer l'application
+    //         Log::error('Erreur lors de l\'ajout à l\'historique: ' . $e->getMessage());
+    //     }
+    // }
+    private function ajouterHistoriqueAction(string $action, string $type, ?string $description = null): void
+    {
         try {
-            // Créer directement l'enregistrement dans l'historique
-            \App\Models\HistoriqueAction::create([
+            $user = Auth::user();
+
+            // Si pas connecté → on ne bloque pas l'app
+            if (!$user) {
+                Log::warning("Historique non enregistré : utilisateur non connecté");
+                return;
+            }
+
+            HistoriqueAction::create([
                 'user_id' => $user->id,
                 'action' => $action,
                 'type' => $type,
-                'description' => $description,
+                'description' => $description ?? 'Aucune description',
             ]);
+
         } catch (\Exception $e) {
-            // En cas d'erreur, on ne fait rien pour ne pas bloquer l'application
-            Log::error('Erreur lors de l\'ajout à l\'historique: ' . $e->getMessage());
+            // On log l'erreur sans bloquer le système
+            Log::error("Erreur historique: " . $e->getMessage(), [
+                'action' => $action,
+                'type' => $type,
+            ]);
         }
     }
 
@@ -134,7 +169,7 @@ class ApiController extends Controller
         }
 
         // Ajouter l'historique sans retourner la réponse
-        $this->ajouterHistorique($user->id, 'dashboard', 'Dashboard');
+        $this->ajouterHistorique('Dashboard_application_mobile'. $user->name, 'dashboard', 'Dashboard');
         
         // Retourner les données du dashboard
         $sommeUtilisateur = User::count();
@@ -185,7 +220,7 @@ class ApiController extends Controller
         }
 
         // Ajouter l'historique sans retourner la réponse
-        $this->ajouterHistorique('liste_vente_application', 'liste_vente', 'Liste des ventes');
+        $this->ajouterHistorique('liste_vente_application ' . $user->name , 'liste_vente', 'Liste des ventes');
 
         $ventes = Vente::with(['client', 'venteDetails.produitUnite.produit'])->orderBy('created_at', 'desc')->get();
         return response()->json([
@@ -204,7 +239,7 @@ class ApiController extends Controller
             ], 401);
         }
         
-        $this->ajouterHistorique('liste_historique_application', 'liste_historiques', 'Liste des historiques');
+        $this->ajouterHistorique('liste_historique_application ' . $user->name , 'liste_historiques', 'Liste des historiques');
         $historiques = HistoriqueAction::with('user')->where('user_id', $user->id)->orderBy('created_at', 'desc')->get();
         return response()->json([
             'message' => 'Recuperation de toute l\'historiques',
@@ -221,7 +256,7 @@ class ApiController extends Controller
             ], 401);
         }
 
-        $this->ajouterHistorique('liste_utilisateur_application', 'liste_utilisateurs', 'Liste des utilisateurs');
+        $this->ajouterHistorique('liste_utilisateur_application ' . $user->name , 'liste_utilisateurs', 'Liste des utilisateurs');
         $utilisateurs = User::with('role')->get();
         return response()->json([
             'message' => 'Recuperation de tous les utilisateurs',
@@ -238,7 +273,7 @@ class ApiController extends Controller
             ], 401);
         }
 
-        $this->ajouterHistorique('liste_role_application'.$user->id , 'liste_roles', 'Liste des roles');
+        $this->ajouterHistorique('liste_role_application'.$user->name , 'liste_roles', 'Liste des roles');
         $roles = Role::all();
         return response()->json([
             'message' => 'Recuperation de tous les roles',
@@ -277,6 +312,8 @@ class ApiController extends Controller
             $vente->statut = 'paye';
             $vente->save();
 
+            //$this->ajouterHistorique('vente_produit_application ' . $user->name, 'vente_produit', 'Vente de produit');
+
             // Traiter chaque produit
             foreach ($request->produits as $index => $produitId) {
                 $quantite = $request->quantites[$index];
@@ -305,7 +342,7 @@ class ApiController extends Controller
             }
 
             // Ajouter l'historique
-            $this->ajouterHistorique('vente_application ' . $user->id, 'creation', 'Vente de produits');
+            $this->ajouterHistorique('vente_application ' . $user->name, 'creation', 'Vente de produits');
 
             return response()->json([
                 'success' => true,
@@ -330,6 +367,15 @@ class ApiController extends Controller
     
     //Deconnexion
     public function logout_api(Request $request){
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json([
+                'message' => 'Utilisateur non trouvé'
+            ], 401);
+        }
+        
+        $this->ajouterHistorique('deconnexion_application' .$user->name , 'deconnexion', 'Déconnexion de l\'application');
         $request->user()->currentAccessToken()->delete();
         
         return response()->json([
@@ -337,8 +383,14 @@ class ApiController extends Controller
         ], 200);
     }
 
-    /**
-     * LES FONCTIONS DE L'APPLICATION WEB
+    /******************************************************************************************************************************
+    *******************************************************************************************************************************
+     
+    /******************************************************************************************************************************
+    *******************************************************************************************************************************
+    
+    
+    * LES FONCTIONS DE L'APPLICATION WEB
      */
     public function index()
     {
@@ -750,6 +802,81 @@ class ApiController extends Controller
     public function store(Request $request)
     {
         //
+    }
+
+    /**
+     * Afficher le rapport de ventes avec bénéfices
+     */
+    public function rapportVente()
+    {
+    // {
+    //     try {
+    //         $dateDebut = $request->date_debut ? Carbon::parse($request->date_debut) : Carbon::now()->startOfMonth();
+    //         $dateFin = $request->date_fin ? Carbon::parse($request->date_fin) : Carbon::now()->endOfDay();
+
+    //         // Récupérer les ventes avec tous les détails
+    //         $ventesQuery = Vente::with(['client', 'venteDetails.produitUnite.produit'])
+    //             ->whereBetween('date_vente', [$dateDebut, $dateFin]);
+
+    //         if ($request->produit_id) {
+    //             $ventesQuery->whereHas('venteDetails', function($query) use ($request) {
+    //                 $query->whereHas('produitUnite', function($subQuery) use ($request) {
+    //                     $subQuery->where('produit_id', $request->produit_id);
+    //                 });
+    //             });
+    //         }
+
+    //         $ventes = $ventesQuery->get();
+
+    //         // Calculer les bénéfices par produit
+    //         $beneficesParProduit = collect();
+    //         $beneficeTotal = 0;
+    //         $totalVentes = $ventes->count();
+
+    //         foreach ($ventes as $vente) {
+    //             foreach ($vente->venteDetails as $detail) {
+    //                 $produit = $detail->produitUnite->produit;
+    //                 $quantiteVendue = 1; // Chaque détail = 1 unité
+                    
+    //                 $benefice = $detail->prix_unitaire - $produit->prix_achat;
+    //                 $totalVente = $detail->total;
+    //                 $coutTotal = $produit->prix_achat * $quantiteVendue;
+                    
+    //                 $produitNom = $produit->nom;
+                    
+    //                 if ($beneficesParProduit->has($produitNom)) {
+    //                     $existing = $beneficesParProduit->get($produitNom);
+    //                     $existing['quantite_vendue'] += $quantiteVendue;
+    //                     $existing['total_ventes'] += $totalVente;
+    //                     $existing['cout_total'] += $coutTotal;
+    //                     $existing['benefice'] += $benefice * $quantiteVendue;
+    //                     $existing['marge'] = $existing['benefice'] > 0 ? (($existing['benefice'] / $existing['total_ventes']) * 100) : 0;
+    //                 } else {
+    //                     $beneficesParProduit->put($produitNom, [
+    //                         'nom' => $produitNom,
+    //                         'quantite_vendue' => $quantiteVendue,
+    //                         'prix_unitaire' => $detail->prix_unitaire,
+    //                         'total_ventes' => $totalVente,
+    //                         'cout_total' => $coutTotal,
+    //                         'benefice' => $benefice * $quantiteVendue,
+    //                         'marge' => $benefice > 0 ? (($benefice * $quantiteVendue) / $totalVente) * 100 : 0
+    //                     ]);
+    //                 }
+                    
+    //                 $beneficeTotal += $benefice * $quantiteVendue;
+    //             }
+    //         }
+
+    //         // Calculer les statistiques générales
+    //         $beneficeMoyen = $totalVentes > 0 ? $beneficeTotal / $totalVentes : 0;
+    //         $meilleurProduit = $beneficesParProduit->sortByDesc('benefice')->first();
+
+            // Récupérer tous les produits pour les filtres
+            //$produits = \App\Models\Produit::all();
+
+            return view('pages.rapport-vente');
+
+       
     }
 
     /**

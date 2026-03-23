@@ -18,5 +18,6 @@ Route::post('/marques/ajout', [ApiController::class, 'ajoutMarque'])->name('marq
 Route::post('/categories/ajout', [ApiController::class, 'ajoutCategorie'])->name('categories.ajout');
 Route::get('/vente', [ApiController::class, 'vente'])->name('vente');
 Route::post('/vente/ajout', [ApiController::class, 'ajouterVente'])->name('ventes.ajout');
+Route::get('/rapport-vente', [ApiController::class, 'rapportVente'])->name('rapports');
 
 Route::post('/logout', [ApiController::class, 'logout'])->name('logout');

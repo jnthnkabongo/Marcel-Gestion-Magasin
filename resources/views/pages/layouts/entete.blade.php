@@ -89,9 +89,9 @@
                         <span>Ventes</span>
                     </a>
                     
-                    <a href="#" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-200">
+                    <a href="{{ route('rapports') }}" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-200">
                         <i class="fas fa-warehouse w-5"></i>
-                        <span>Approvionnement</span>
+                        <span>Rapport de vente</span>
                     </a>
                     
                     <div class="pt-4 pb-2">

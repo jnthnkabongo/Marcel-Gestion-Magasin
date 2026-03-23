@@ -366,6 +366,20 @@
                             Enregistrer
                         </button>
                     </div>
+                    @if(session('success'))
+                        <script>
+                            setTimeout(function() {
+                                Swal.fire({
+                                    title: "Succès!",
+                                    text: "{{ session('success') }}",
+                                    icon: "success",
+                                    timer: 3000,
+                                    showConfirmButton: false,
+                                    showCancelButton: false
+                                });
+                            }, 500);
+                        </script>
+                    @endif
                 </form>
             </div>
         </div>
@@ -403,6 +417,20 @@
                             Enregistrer
                         </button>
                     </div>
+                    @if(session('success'))
+                        <script>
+                            setTimeout(function() {
+                                Swal.fire({
+                                    title: "Succès!",
+                                    text: "{{ session('success') }}",
+                                    icon: "success",
+                                    timer: 3000,
+                                    showConfirmButton: false,
+                                    showCancelButton: false
+                                });
+                            }, 500);
+                        </script>
+                    @endif
                 </form>
             </div>
         </div>

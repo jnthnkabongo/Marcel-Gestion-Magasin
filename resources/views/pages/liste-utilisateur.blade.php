@@ -16,25 +16,6 @@
                         Nouvel utilisateur
                     </button>
                 </div>
-                
-                <!-- Messages de notification -->
-                @if(session('success'))
-                    <div class="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
-                        <div class="flex items-center">
-                            <i class="fas fa-check-circle mr-2"></i>
-                            <span>{{ session('success') }}</span>
-                        </div>
-                    </div>
-                @endif
-                
-                @if(session('error'))
-                    <div class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-                        <div class="flex items-center">
-                            <i class="fas fa-exclamation-triangle mr-2"></i>
-                            <span>{{ session('error') }}</span>
-                        </div>
-                    </div>
-                @endif
             </div>
 
             <!-- Stats cards -->
@@ -179,11 +160,13 @@
                                                 @if(session('success'))
                                                 <script>
                                                     setTimeout(function() {
-                                                        swal({
+                                                        Swal.fire({
+                                                            title: "Succès!",
                                                             text: "{{ session('success') }}",
                                                             icon: "success",
                                                             timer: 3000,
-                                                            buttons: false
+                                                            showConfirmButton: false,
+                                                            showCancelButton: false
                                                         });
                                                     }, 500);
                                                 </script>
