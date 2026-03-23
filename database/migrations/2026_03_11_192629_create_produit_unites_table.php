@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('produit_id')->constrained('produits');
             $table->string('numero_serie', 150)->unique();
-            $table->string('quantite', 100);
+            $table->string('quantite')->default(1);
             $table->enum('statut', ['en_stock', 'vendu', 'defectueux'])->default('en_stock');
             $table->timestamps();
         });

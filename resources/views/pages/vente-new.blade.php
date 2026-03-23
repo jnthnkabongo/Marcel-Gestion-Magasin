@@ -281,7 +281,7 @@
             <form class="space-y-4" method="POST" action="{{ route('ventes.ajout') }}" onsubmit="return validateStock()">
                 @csrf
                 <div class="grid grid-cols-2 gap-4">
-                    <div>
+                    {{-- <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Client</label>
                         <select name="client_id" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" required>
                             <option value="">Sélectionner un client</option>
@@ -291,7 +291,7 @@
                                 @endforeach
                             @endif
                         </select>
-                    </div>
+                    </div> --}}
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Nom du client</label>
                         <input type="text" name="nom_client" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Nom du client (optionnel)">
@@ -482,7 +482,6 @@
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Quantité</label>
                 <input type="number" name="quantites[]" min="1" max="${stockDisponible}" value="1" class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 readonly">
-                
                 <div class="text-xs text-blue-600">
                  
                 </div>

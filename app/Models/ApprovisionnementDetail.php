@@ -6,7 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class ApprovisionnementDetail extends Model
 {
-    protected $fillable = ['approvisionnement_id', 'produit_id', 'quantite', 'prix_achat'];
+    protected $fillable = [
+        'approvisionnement_id', 
+        'produit_id', 
+        'quantite', 
+        'prix_achat'
+    ];
 
     public function approvisionnement()
     {

@@ -6,7 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class Marque extends Model
 {
-    protected $fillable = ['nom', 'description', 'logo'];
+    protected $fillable = [
+        'nom', 
+        'description',
+        'logo'
+    ];
 
     protected $casts = [
         'logo' => 'string',

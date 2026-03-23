@@ -6,7 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class Garantie extends Model
 {
-    protected $fillable = ['produit_unite_id', 'client_id', 'date_debut', 'date_fin'];
+    protected $fillable = [
+        'produit_unite_id', 
+        'client_id', 
+        'date_debut', 
+        'date_fin'
+    ];
 
     public function produitUnite()
     {

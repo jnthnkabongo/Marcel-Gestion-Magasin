@@ -6,7 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class Paiement extends Model
 {
-    protected $fillable = ['vente_id', 'montant', 'methode', 'date'];
+    protected $fillable = [
+        'vente_id', 
+        'montant', 
+        'methode', 
+        'date'
+    ];
 
     public function vente()
     {

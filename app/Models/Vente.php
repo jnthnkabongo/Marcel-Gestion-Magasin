@@ -10,9 +10,10 @@ class Vente extends Model
         'client_id',
         'user_id', 
         'nom_client',
-        'date', 
+        'date_vente', 
         'total', 
-        'statut'];
+        'statut'
+    ];
 
     public function client()
     {

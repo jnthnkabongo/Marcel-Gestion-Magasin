@@ -264,15 +264,13 @@
                             <label class="block text-sm font-medium text-gray-700 mb-1">Nom du produit</label>
                             <input type="text" name="nom" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Entrez le nom" required>
                         </div>
+
+
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Catégorie</label>
-                            <select name="categorie_id" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                                <option value="">Sélectionner une catégorie</option>
-                                @foreach ($categories as $categorie)
-                                    <option value="{{ $categorie->id }}">{{ $categorie->nom }}</option>
-                                @endforeach
-                            </select>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Modèle</label>
+                            <input type="text" name="modele" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Entrez le modèle">
                         </div>
+                        
                     </div>
                     
                     <div class="grid grid-cols-2 gap-4">
@@ -286,20 +284,23 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Modèle</label>
-                            <input type="text" name="modele" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Entrez le modèle">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Catégorie</label>
+                            <select name="categorie_id" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                                <option value="">Sélectionner une catégorie</option>
+                                @foreach ($categories as $categorie)
+                                    <option value="{{ $categorie->id }}">{{ $categorie->nom }}</option>
+                                @endforeach
+                            </select>
                         </div>
+
                     </div>
                     
                     <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Numéro série</label>
-                            <input type="text" name="numero_serie" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Entrez le numéro de série" required>
-                        </div>
-                        <div>
+                        
+                        {{-- <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Stock minimum</label>
                             <input type="number" name="stock_min" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Entrez le stock minimum" required>
-                        </div>
+                        </div> --}}
                     </div>
                     
                     <div class="grid grid-cols-2 gap-4">
@@ -313,10 +314,17 @@
                         </div>
                     </div>
                     
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Numéro série</label>
+                            <input type="text" name="numero_serie" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Entrez le numéro de série" required>
+                        </div>
+                        <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
                         <textarea name="description" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" rows="3" placeholder="Entrez la description du produit"></textarea>
-                    </div>
+                    
+                        </div>
+                  </div>
                     <div class="flex justify-end space-x-3 pt-4">
                         <button type="button" onclick="closeModal('modalNouveauProduit')" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
                             Annuler

@@ -10,7 +10,8 @@ class VenteDetail extends Model
         'vente_id', 
         'produit_unite_id', 
         'prix_unitaire', 
-        'total'];
+        'total'
+    ];
 
     public function vente()
     {

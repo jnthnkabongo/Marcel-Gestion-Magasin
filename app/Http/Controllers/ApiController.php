@@ -342,7 +342,7 @@ class ApiController extends Controller
      */
     public function index()
     {
-        //    User::create([
+        // User::create([
         //     'name' => 'Jonathan kabongo',
         //     'email' => 'jnthnkabongo@gmail.com',
         //     'role_id' => 1,
@@ -460,8 +460,8 @@ class ApiController extends Controller
             }, 'approvisionnementDetails'])
             ->orderBy('created_at', 'desc')
             ->paginate('10');
-        $categories = Categorie::orderBy('created_at','desc')->get();
-        $marques = Marque::orderBy('created_at','desc')->get();
+        $categories = Categorie::orderBy('nom','asc')->get();
+        $marques = Marque::orderBy('nom','asc')->get();
         return view('pages.liste-produit', compact('produits', 'categories', 'marques', 'totalProduit', 'totalProduitStock', 'totalProduitStockVendu'));
     }
 
@@ -562,8 +562,7 @@ class ApiController extends Controller
             'description' => 'nullable|string|max:1000',
             'prix_achat' => 'required|numeric',
             'prix_vente' => 'required|numeric',
-            'stock_min' => 'required|numeric',
-            'numero_serie' => 'required|string|max:255'
+            'numero_serie' => 'required|string|max:30'
         ]);
 
         try {
@@ -577,7 +576,7 @@ class ApiController extends Controller
             $produit->description = $validated['description'] ?? null;
             $produit->prix_achat = $validated['prix_achat'];
             $produit->prix_vente = $validated['prix_vente'];
-            $produit->stock_min = $validated['stock_min'];
+            $produit->stock_min = 1;
             $produit->save();
 
             // Création de l'unité produit
@@ -585,6 +584,7 @@ class ApiController extends Controller
             $produitUnit->produit_id = $produit->id;
             $produitUnit->numero_serie = $validated['numero_serie'];
             $produitUnit->statut = 'en_stock';
+            $produitUnit->quantite = 1;
             $produitUnit->save();
 
             $this->ajouterHistorique('ajout-produit', 'creation', 'Produit "' . $produit->nom . '" créé');
@@ -657,7 +657,6 @@ class ApiController extends Controller
     {
         try {
             $request->validate([
-                'client_id' => 'required|exists:users,id',
                 'nom_client' => 'required|string|max:255',
                 'date_vente' => 'required|date',
                 'produits' => 'required|array',
@@ -670,15 +669,23 @@ class ApiController extends Controller
                 'totaux.*' => 'required|numeric|min:0'
             ]);
 
+            // Créer ou récupérer le client
+            $client = Client::firstOrCreate(
+                ['nom_client' => $request->nom_client],
+                [
+                    'email' => $request->nom_client . '@example.com',
+                    'telephone' => '0000000000',
+                    'adresse' => 'Adresse par défaut'
+                ]
+            );
+
             // Créer la vente
             $vente = new Vente();
-            $vente->client_id = $request->client_id;
-            $vente->nom_client = $request->nom_client;
+            $vente->client_id = $client->id; // Utiliser l'ID du client créé/récupéré
+            //$vente->nom_client = $request->nom_client;
             $vente->user_id = Auth::id(); // Ajouter l'utilisateur qui effectue la vente
             $vente->date_vente = $request->date_vente;
             $vente->reference = $request->reference ?? 'VTE-' . date('YmdHis');
-            //$vente->description = $request->description;
-            //$vente->statut = 'completed';
             $vente->total = array_sum($request->totaux);
             $vente->save();
 
@@ -723,13 +730,7 @@ class ApiController extends Controller
             }
 
             // Ajouter l'historique
-            HistoriqueAction::create([
-                'user_id' => Auth::id(),
-                'action' => 'creation',
-                'table_concernee' => 'ventes',
-                'id_concerne' => $vente->id,
-                'details' => 'Nouvelle vente enregistrée: ' . $vente->reference
-            ]);
+            $this->ajouterHistoriqueAction('creation', 'ventes', $vente->id, 'Nouvelle vente enregistrée: ' . $vente->reference);
 
             return redirect()->back()->with('success', 'Vente enregistrée avec succès!');
 
