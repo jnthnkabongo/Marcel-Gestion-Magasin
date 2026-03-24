@@ -19,9 +19,9 @@
                     <h3 class="text-lg font-semibold">Bénéfice Total</h3>
                     <i class="fas fa-chart-line text-2xl opacity-80"></i>
                 </div>
-                <div class="text-3xl font-bold"> $ 15000</div>
+                <div class="text-3xl font-bold">{{ number_format($beneficeTotal, 0, ',', ' ') }} $</div>
                 <div class="text-sm opacity-90 mt-2">
-                
+                    Cumul des bénéfices
                 </div>
             </div>
 
@@ -31,7 +31,7 @@
                     <h3 class="text-lg font-semibold">Total Ventes</h3>
                     <i class="fas fa-shopping-cart text-2xl opacity-80"></i>
                 </div>
-                <div class="text-3xl font-bold"> 45</div>
+                <div class="text-3xl font-bold">{{ $totalVentes }}</div>
                 <div class="text-sm opacity-90 mt-2">
                     Transactions effectuées
                 </div>
@@ -43,7 +43,7 @@
                     <h3 class="text-lg font-semibold">Bénéfice Moyen</h3>
                     <i class="fas fa-calculator text-2xl opacity-80"></i>
                 </div>
-                <div class="text-3xl font-bold"> $ 3000</div>
+                <div class="text-3xl font-bold">{{ number_format($beneficeMoyen, 0, ',', ' ') }} $</div>
                 <div class="text-sm opacity-90 mt-2">
                     Par vente
                 </div>
@@ -55,9 +55,9 @@
                     <h3 class="text-lg font-semibold">Meilleur Produit</h3>
                     <i class="fas fa-trophy text-2xl opacity-80"></i>
                 </div>
-                <div class="text-xl font-bold">Produit A</div>
+                <div class="text-xl font-bold">{{ $meilleurProduit['nom'] ?? 'N/A' }}</div>
                 <div class="text-sm opacity-90 mt-2">
-                    $ 340
+                    {{ number_format($meilleurProduit['benefice'] ?? 0, 0, ',', ' ') }} $
                 </div>
             </div>
         </div>
@@ -99,7 +99,7 @@
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">N</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">N°</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Produit</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prix Unitaire</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Ventes</th>
@@ -109,13 +109,34 @@
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
+                        @forelse($produitRapports as $index => $Rapport)
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $index + 1 }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $Rapport['nom'] }}</td>
+
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ number_format($Rapport['cout_total'], 0, ',', ' ') }} $</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ number_format($Rapport['prix_unitaire'], 0, ',', ' ') }} $</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ number_format($Rapport['total_ventes'], 0, ',', ' ') }} $</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                    <span class="{{ $Rapport['benefice'] > 0 ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold' }}">
+                                        {{ number_format($Rapport['benefice'], 0, ',', ' ') }} $
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    <span class="{{ $Rapport['marge'] > 50 ? 'text-green-600' : ($Rapport['marge'] > 20 ? 'text-yellow-600' : 'text-red-600') }}">
+                                        {{ number_format($Rapport['marge'], 1) }}%
+                                    </span>
+                                </td>
+                            </tr>
+                        @empty
                         <tr>
-                            <td colspan="8" class="px-6 py-8 text-center text-gray-500">
+                            <td colspan="7" class="px-6 py-8 text-center text-gray-500">
                                 <i class="fas fa-chart-bar text-4xl mb-3 text-gray-300"></i>
                                 <p class="text-lg">Aucune donnée trouvée pour cette période</p>
                                 <p class="text-sm">Essayez de modifier les filtres ou la période</p>
                             </td>
                         </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>

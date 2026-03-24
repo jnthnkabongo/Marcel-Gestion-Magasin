@@ -436,6 +436,10 @@ class ApiController extends Controller
 
     public function dashboard()
     {
+        $user = Auth::user();
+        if (!$user) {
+            return redirect()->route('index')->with('error', 'Vous devez être connecté pour accéder au dashboard');
+        }
         $totalUtilisateurs = User::count();
         $totalProduts = Produit::count();
         $totalVentes = VenteDetail::count();
@@ -475,6 +479,10 @@ class ApiController extends Controller
 
     public function listeUtilisateurs()
     {
+        $user = Auth::user();
+        if (!$user) {
+            return redirect()->route('index')->with('error', 'Vous devez être connecté pour accéder au dashboard');
+        }
         $users = User::with('role')->paginate('10');
         $administrateurs = User::where('role_id', 1)->count();
         $roles = Role::orderBy('created_at', 'desc')->get();
@@ -486,6 +494,10 @@ class ApiController extends Controller
 
     public function listeProduits()
     {
+        $user = Auth::user();
+        if (!$user) {
+            return redirect()->route('index')->with('error', 'Vous devez être connecté pour accéder au dashboard');
+        }
         $totalProduit = Produit::count();
         // $totalProduit = DB::table('produits')
         //     ->join('produit_unites', 'produits.id', '=', 'produit_unites.produit_id')
@@ -519,6 +531,10 @@ class ApiController extends Controller
 
     public function AjoutUtilisateur(RegisterRequest $request){
         //dd($request->all());
+        $user = Auth::user();
+        if (!$user) {
+            return redirect()->route('index')->with('error', 'Vous devez être connecté pour accéder au dashboard');
+        }
         $validated = $request->validated();
         // $validated = $request->validate([
         //     'name' => 'required|string|max:255',
@@ -540,6 +556,10 @@ class ApiController extends Controller
     }
 
     public function suppressionUtilisateur($id){
+        $user = Auth::user();
+        if (!$user) {
+            return redirect()->route('index')->with('error', 'Vous devez être connecté pour accéder au dashboard');
+        }
         try {
             $user = User::findOrFail($id);
             
@@ -558,6 +578,10 @@ class ApiController extends Controller
 
     public function ajoutMarque(Request $request)
     {
+        $user = Auth::user();
+        if (!$user) {
+            return redirect()->route('index')->with('error', 'Vous devez être connecté pour accéder au dashboard');
+        }
         $validated = $request->validate([
             'nom' => 'required|string|max:100|unique:marques,nom',
             'description' => 'required|string|max:255',
@@ -583,6 +607,11 @@ class ApiController extends Controller
 
     public function ajoutCategorie(Request $request)
     {
+        $user = Auth::user();
+        if (!$user) {
+            return redirect()->route('index')->with('error', 'Vous devez être connecté pour accéder au dashboard');
+        }
+
         $validated = $request->validate([
             'nom' => 'required|string|max:255|unique:categories,nom',
             'description' => 'nullable|string|max:1000'
@@ -606,6 +635,11 @@ class ApiController extends Controller
 
     public function ajoutProduit(Request $request)
     {
+        $user = Auth::user();
+        if (!$user) {
+            return redirect()->route('index')->with('error', 'Vous devez être connecté pour accéder au dashboard');
+        }
+
         $validated = $request->validate([
             'nom' => 'required|string|max:255',
             'categorie_id' => 'required|exists:categories,id',
@@ -655,6 +689,11 @@ class ApiController extends Controller
 
     public function parametres()
     {
+        $user = Auth::user();
+        if (!$user) {
+            return redirect()->route('index')->with('error', 'Vous devez être connecté pour accéder au dashboard');
+        }
+
         $marques = Marque::all();
         $categories = Categorie::all();
 
@@ -664,6 +703,11 @@ class ApiController extends Controller
     }
 
     public function historiques(){
+        $user = Auth::user();
+        if (!$user) {
+            return redirect()->route('index')->with('error', 'Vous devez être connecté pour accéder au dashboard');
+        }
+
         // Statistiques
         $historiquesAujourdhui = HistoriqueAction::whereDate('created_at', today())->count();
         $totalCreations = HistoriqueAction::where('action', 'creation')->count();
@@ -690,6 +734,11 @@ class ApiController extends Controller
     }
 
     public function vente(){
+        $user = Auth::user();
+        if (!$user) {
+            return redirect()->route('index')->with('error', 'Vous devez être connecté pour accéder au dashboard');
+        }
+        
         $liste_produits = Produit::with('categorie', 'produitUnites')->orderBy('created_at','desc')->get();
         $clients = Client::orderBy('created_at', 'desc')->get();
         $ventes = Vente::with(['client', 'venteDetails.produitUnite.produit'])->orderBy('created_at', 'desc')->paginate('10');
@@ -707,6 +756,11 @@ class ApiController extends Controller
 
     public function ajouterVente(Request $request)
     {
+        $user = Auth::user();
+        if (!$user) {
+            return redirect()->route('index')->with('error', 'Vous devez être connecté pour accéder au dashboard');
+        }
+        
         try {
             $request->validate([
                 'nom_client' => 'required|string|max:255',
@@ -809,74 +863,67 @@ class ApiController extends Controller
      */
     public function rapportVente()
     {
-    // {
-    //     try {
-    //         $dateDebut = $request->date_debut ? Carbon::parse($request->date_debut) : Carbon::now()->startOfMonth();
-    //         $dateFin = $request->date_fin ? Carbon::parse($request->date_fin) : Carbon::now()->endOfDay();
+        // Récupérer les produits unites vendus avec leurs relations
+        $produitsVendus = ProduitUnite::with('produit.categorie', 'venteDetails.vente.client')
+            ->where('statut', 'vendu')
+            ->orderBy('updated_at', 'desc')
+            ->paginate('10');
 
-    //         // Récupérer les ventes avec tous les détails
-    //         $ventesQuery = Vente::with(['client', 'venteDetails.produitUnite.produit'])
-    //             ->whereBetween('date_vente', [$dateDebut, $dateFin]);
+        // Grouper par produit et calculer les statistiques
+        $beneficesParProduit = collect();
+        $beneficeTotal = 0;
+        $totalVentes = 0;
 
-    //         if ($request->produit_id) {
-    //             $ventesQuery->whereHas('venteDetails', function($query) use ($request) {
-    //                 $query->whereHas('produitUnite', function($subQuery) use ($request) {
-    //                     $subQuery->where('produit_id', $request->produit_id);
-    //                 });
-    //             });
-    //         }
+        foreach ($produitsVendus as $produitUnite) {
+            $produit = $produitUnite->produit;
+            $produitNom = $produit->nom;
+            $prixAchat = $produit->prix_achat;
+            
+            // Récupérer le prix de vente depuis vente_detail
+            $prixVente = 0;
+            if ($produitUnite->venteDetails && $produitUnite->venteDetails->isNotEmpty()) {
+                $derniereVente = $produitUnite->venteDetails->first();
+                $prixVente = $derniereVente->prix_unitaire;
+            } else {
+                // Fallback: utiliser le prix de vente du produit
+                $prixVente = $produit->prix_vente;
+            }
+            
+            $beneficeUnitaire = $prixVente - $prixAchat;
 
-    //         $ventes = $ventesQuery->get();
+            if ($beneficesParProduit->has($produitNom)) {
+                $existing = $beneficesParProduit->get($produitNom);
+                $existing['quantite_vendue'] += 1;
+                $existing['total_ventes'] += $prixVente;
+                $existing['cout_total'] += $prixAchat;
+                $existing['benefice'] += $beneficeUnitaire;
+                $existing['marge'] = $existing['total_ventes'] > 0 ? (($existing['benefice'] / $existing['total_ventes']) * 100) : 0;
+            } else {
+                $beneficesParProduit->put($produitNom, [
+                    'id' => $produit->id,
+                    'nom' => $produitNom,
+                    'quantite_vendue' => 1,
+                    'prix_unitaire' => $prixVente,
+                    'total_ventes' => $prixVente,
+                    'cout_total' => $prixAchat,
+                    'benefice' => $beneficeUnitaire,
+                    'marge' => $beneficeUnitaire > 0 ? (($beneficeUnitaire / $prixVente) * 100) : 0,
+                    'categorie' => $produit->categorie->nom ?? 'N/A'
+                ]);
+            }
+            
+            $beneficeTotal += $beneficeUnitaire;
+            $totalVentes++;
+        }
 
-    //         // Calculer les bénéfices par produit
-    //         $beneficesParProduit = collect();
-    //         $beneficeTotal = 0;
-    //         $totalVentes = $ventes->count();
+        // Calculer les statistiques générales
+        $beneficeMoyen = $totalVentes > 0 ? $beneficeTotal / $totalVentes : 0;
+        $meilleurProduit = $beneficesParProduit->sortByDesc('benefice')->first();
 
-    //         foreach ($ventes as $vente) {
-    //             foreach ($vente->venteDetails as $detail) {
-    //                 $produit = $detail->produitUnite->produit;
-    //                 $quantiteVendue = 1; // Chaque détail = 1 unité
-                    
-    //                 $benefice = $detail->prix_unitaire - $produit->prix_achat;
-    //                 $totalVente = $detail->total;
-    //                 $coutTotal = $produit->prix_achat * $quantiteVendue;
-                    
-    //                 $produitNom = $produit->nom;
-                    
-    //                 if ($beneficesParProduit->has($produitNom)) {
-    //                     $existing = $beneficesParProduit->get($produitNom);
-    //                     $existing['quantite_vendue'] += $quantiteVendue;
-    //                     $existing['total_ventes'] += $totalVente;
-    //                     $existing['cout_total'] += $coutTotal;
-    //                     $existing['benefice'] += $benefice * $quantiteVendue;
-    //                     $existing['marge'] = $existing['benefice'] > 0 ? (($existing['benefice'] / $existing['total_ventes']) * 100) : 0;
-    //                 } else {
-    //                     $beneficesParProduit->put($produitNom, [
-    //                         'nom' => $produitNom,
-    //                         'quantite_vendue' => $quantiteVendue,
-    //                         'prix_unitaire' => $detail->prix_unitaire,
-    //                         'total_ventes' => $totalVente,
-    //                         'cout_total' => $coutTotal,
-    //                         'benefice' => $benefice * $quantiteVendue,
-    //                         'marge' => $benefice > 0 ? (($benefice * $quantiteVendue) / $totalVente) * 100 : 0
-    //                     ]);
-    //                 }
-                    
-    //                 $beneficeTotal += $benefice * $quantiteVendue;
-    //             }
-    //         }
+        // Convertir en collection pour la pagination dans la vue
+        $produitRapports = $beneficesParProduit->values();
 
-    //         // Calculer les statistiques générales
-    //         $beneficeMoyen = $totalVentes > 0 ? $beneficeTotal / $totalVentes : 0;
-    //         $meilleurProduit = $beneficesParProduit->sortByDesc('benefice')->first();
-
-            // Récupérer tous les produits pour les filtres
-            //$produits = \App\Models\Produit::all();
-
-            return view('pages.rapport-vente');
-
-       
+        return view('pages.rapport-vente', compact('produitRapports', 'beneficeTotal', 'totalVentes', 'beneficeMoyen', 'meilleurProduit'));
     }
 
     /**
