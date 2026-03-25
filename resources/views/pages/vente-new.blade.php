@@ -4,24 +4,6 @@
 <div class="flex-1 flex flex-col overflow-hidden">
     <!-- Main Content -->
     <main class="flex-1 overflow-y-auto p-6">
-        <!-- Messages de notification -->
-        @if(session('success'))
-            <div class="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
-                <div class="flex items-center">
-                    <i class="fas fa-check-circle mr-2"></i>
-                    {{ session('success') }}
-                </div>
-            </div>
-        @endif
-        
-        @if(session('error'))
-            <div class="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-                <div class="flex items-center">
-                    <i class="fas fa-exclamation-circle mr-2"></i>
-                    {{ session('error') }}
-                </div>
-            </div>
-        @endif
         <!-- Header -->
         <header class="bg-white shadow-sm border-b border-gray-200 mb-6">
             <div class="px-6 py-4">
@@ -182,7 +164,7 @@
                                 </td> --}}
 
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    {{ $vente->nom_client}}
+                                    {{ $vente->client->nom_client}}
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-900">
                                     <div class="max-w-xs">
@@ -343,6 +325,20 @@
                             Enregistrer la vente
                         </button>
                     </div>
+                      @if(session('success'))
+                        <script>
+                            setTimeout(function() {
+                                Swal.fire({
+                                    title: "Succès!",
+                                    text: "{{ session('success') }}",
+                                    icon: "success",
+                                    timer: 3000,
+                                    showConfirmButton: false,
+                                    showCancelButton: false
+                                });
+                            }, 500);
+                        </script>
+                    @endif
                 </div>
             </form>
         </div>

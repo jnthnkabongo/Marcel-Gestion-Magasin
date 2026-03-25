@@ -101,6 +101,8 @@
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">N°</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Produit</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date Vente</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Numéro Série</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prix Unitaire</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Ventes</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Coût Total</th>
@@ -113,10 +115,13 @@
                             <tr>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $index + 1 }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $Rapport['nom'] }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $Rapport['date_vente'] }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $Rapport['numero_serie'] }}</td>
 
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ number_format($Rapport['cout_total'], 0, ',', ' ') }} $</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ number_format($Rapport['prix_unitaire'], 0, ',', ' ') }} $</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ number_format($Rapport['total_ventes'], 0, ',', ' ') }} $</td>
+
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ number_format($Rapport['prix_unitaire'], 0, ',', ' ') }} $</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm">
                                     <span class="{{ $Rapport['benefice'] > 0 ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold' }}">
                                         {{ number_format($Rapport['benefice'], 0, ',', ' ') }} $
@@ -130,7 +135,7 @@
                             </tr>
                         @empty
                         <tr>
-                            <td colspan="7" class="px-6 py-8 text-center text-gray-500">
+                            <td colspan="10" class="px-6 py-8 text-center text-gray-500">
                                 <i class="fas fa-chart-bar text-4xl mb-3 text-gray-300"></i>
                                 <p class="text-lg">Aucune donnée trouvée pour cette période</p>
                                 <p class="text-sm">Essayez de modifier les filtres ou la période</p>

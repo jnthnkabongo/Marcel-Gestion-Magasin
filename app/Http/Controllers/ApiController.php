@@ -462,7 +462,7 @@ class ApiController extends Controller
     //     // Liste des historiques avec pagination
     //     $historiques = HistoriqueAction::with('user')
     //         ->orderBy('created_at', 'desc')
-    //         ->paginate(20);
+    //         ->paginate(10);
             
     //     // Liste des utilisateurs pour le filtre
     //     $users = User::orderBy('name')->get();
@@ -677,7 +677,7 @@ class ApiController extends Controller
 
             return redirect()
                 ->route('produits')
-                ->with('success', 'Produit "' . $produit->nom . '" créé avec succès');
+                ->with('success', 'Produit ' . $produit->nom . ' cree avec succes');
 
         } catch (\Exception $e) {
             dd($e->getMessage());
@@ -836,9 +836,9 @@ class ApiController extends Controller
             }
 
             // Ajouter l'historique
-            $this->ajouterHistoriqueAction('creation', 'ventes', $vente->id, 'Nouvelle vente enregistrée: ' . $vente->reference);
+            $this->ajouterHistoriqueAction('creation '. $user->name, 'ventes', 'Nouvelle vente enregistrée: ' . $vente->reference);
 
-            return redirect()->back()->with('success', 'Vente enregistrée avec succès!');
+            return redirect()->back()->with('success', 'Vente enregistree avec succes !');
 
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Erreur lors de l\'enregistrement de la vente: ' . $e->getMessage())->withInput();
@@ -867,16 +867,15 @@ class ApiController extends Controller
         $produitsVendus = ProduitUnite::with('produit.categorie', 'venteDetails.vente.client')
             ->where('statut', 'vendu')
             ->orderBy('updated_at', 'desc')
-            ->paginate('10');
+            ->get();
 
-        // Grouper par produit et calculer les statistiques
-        $beneficesParProduit = collect();
+        // Préparer les données pour l'affichage individuel
+        $produitRapports = [];
         $beneficeTotal = 0;
         $totalVentes = 0;
 
-        foreach ($produitsVendus as $produitUnite) {
+        foreach ($produitsVendus as $index => $produitUnite) {
             $produit = $produitUnite->produit;
-            $produitNom = $produit->nom;
             $prixAchat = $produit->prix_achat;
             
             // Récupérer le prix de vente depuis vente_detail
@@ -891,26 +890,20 @@ class ApiController extends Controller
             
             $beneficeUnitaire = $prixVente - $prixAchat;
 
-            if ($beneficesParProduit->has($produitNom)) {
-                $existing = $beneficesParProduit->get($produitNom);
-                $existing['quantite_vendue'] += 1;
-                $existing['total_ventes'] += $prixVente;
-                $existing['cout_total'] += $prixAchat;
-                $existing['benefice'] += $beneficeUnitaire;
-                $existing['marge'] = $existing['total_ventes'] > 0 ? (($existing['benefice'] / $existing['total_ventes']) * 100) : 0;
-            } else {
-                $beneficesParProduit->put($produitNom, [
-                    'id' => $produit->id,
-                    'nom' => $produitNom,
-                    'quantite_vendue' => 1,
-                    'prix_unitaire' => $prixVente,
-                    'total_ventes' => $prixVente,
-                    'cout_total' => $prixAchat,
-                    'benefice' => $beneficeUnitaire,
-                    'marge' => $beneficeUnitaire > 0 ? (($beneficeUnitaire / $prixVente) * 100) : 0,
-                    'categorie' => $produit->categorie->nom ?? 'N/A'
-                ]);
-            }
+            // Ajouter chaque article vendu individuellement
+            $produitRapports[] = [
+                'id' => $produit->id,
+                'nom' => $produit->nom,
+                'quantite_vendue' => 1, // Chaque ligne représente 1 article
+                'prix_unitaire' => $prixVente,
+                'total_ventes' => $prixVente,
+                'cout_total' => $prixAchat,
+                'benefice' => $beneficeUnitaire,
+                'marge' => $beneficeUnitaire > 0 ? (($beneficeUnitaire / $prixVente) * 100) : 0,
+                'categorie' => $produit->categorie->nom ?? 'N/A',
+                'date_vente' => $produitUnite->updated_at ? $produitUnite->updated_at->format('d/m/Y') : 'N/A',
+                'numero_serie' => $produitUnite->numero_serie ?? 'N/A'
+            ];
             
             $beneficeTotal += $beneficeUnitaire;
             $totalVentes++;
@@ -918,12 +911,41 @@ class ApiController extends Controller
 
         // Calculer les statistiques générales
         $beneficeMoyen = $totalVentes > 0 ? $beneficeTotal / $totalVentes : 0;
-        $meilleurProduit = $beneficesParProduit->sortByDesc('benefice')->first();
+        
+        // Trouver le meilleur produit (basé sur le nom du produit)
+        $produitsGroupes = collect($produitRapports)->groupBy('nom');
+        $meilleurProduit = null;
+        foreach ($produitsGroupes as $nom => $articles) {
+            $beneficeTotalProduit = $articles->sum('benefice');
+            if (!$meilleurProduit || $beneficeTotalProduit > $meilleurProduit['benefice']) {
+                $meilleurProduit = [
+                    'nom' => $nom,
+                    'benefice' => $beneficeTotalProduit
+                ];
+            }
+        }
 
-        // Convertir en collection pour la pagination dans la vue
-        $produitRapports = $beneficesParProduit->values();
+        // Pagination manuelle
+        $currentPage = request('page', 1);
+        $perPage = 10;
+        $totalItems = count($produitRapports);
+        $totalPages = ceil($totalItems / $perPage);
+        
+        $offset = ($currentPage - 1) * $perPage;
+        $produitsPage = array_slice($produitRapports, $offset, $perPage);
+        $produitRapports = $produitsPage;
 
-        return view('pages.rapport-vente', compact('produitRapports', 'beneficeTotal', 'totalVentes', 'beneficeMoyen', 'meilleurProduit'));
+        return view('pages.rapport-vente', compact(
+            'produitRapports',
+            'beneficeTotal',
+            'totalVentes',
+            'beneficeMoyen',
+            'meilleurProduit',
+            'currentPage',
+            'totalPages',
+            'totalItems',
+            'perPage'
+        ));
     }
 
     /**

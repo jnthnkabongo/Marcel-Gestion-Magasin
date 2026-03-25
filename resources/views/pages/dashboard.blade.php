@@ -55,7 +55,7 @@
                             <i class="fas fa-chart-line text-purple-600"></i>
                         </div>
                         <div>
-                            <p class="text-gray-500 text-sm">Revenus</p>
+                            <p class="text-gray-500 text-sm">Clients</p>
                             <p class="text-2xl font-bold text-gray-800">{{ $totalClients }}</p>
                         </div>
                     </div>
@@ -149,7 +149,7 @@
                                             </div>
                                             <div>
                                                 {{-- <div class="font-medium text-gray-900">{{ $vente->client->nom ?? 'Client inconnu' }}</div> --}}
-                                                <div class="font-medium text-gray-900">{{ $vente->nom_client ?? 'Client inconnu'}}</div>
+                                                <div class="font-medium text-gray-900">{{ $vente->client->nom_client ?? 'Client inconnu'}}</div>
                                                 <div class="text-xs text-gray-500">ID: {{ $vente->client_id }}</div>
                                             </div>
                                         </div>
@@ -225,23 +225,12 @@
                 </div>
                 
                 <!-- Pagination -->
-                <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+                <div class="">
                     @if(isset($ventes) && $ventes->hasPages())
                         <div class="px-6 py-4 border-t border-gray-200">
                             {{ $ventes->links() }}
                         </div>
                     @endif
-                    <div class="text-sm text-gray-700">
-                        Affichage de <span class="font-medium">0</span> à <span class="font-medium">0</span> sur <span class="font-medium">0</span> résultats
-                    </div>
-                    <div class="flex space-x-2">
-                        <button class="px-3 py-1 border border-gray-300 rounded-md text-sm text-gray-500 hover:bg-gray-50 disabled:opacity-50" disabled>
-                            Précédent
-                        </button>
-                        <button class="px-3 py-1 border border-gray-300 rounded-md text-sm text-gray-500 hover:bg-gray-50 disabled:opacity-50" disabled>
-                            Suivant
-                        </button>
-                    </div>
                 </div>
             </div>          
         </main>
