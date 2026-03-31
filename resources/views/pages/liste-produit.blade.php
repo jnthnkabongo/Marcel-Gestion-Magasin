@@ -210,17 +210,35 @@
                                     </td> --}}
                                    
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <button class="text-blue-600 hover:text-blue-700 mr-2">
+                                        <button onclick="openEditModal({{ $produit->id }}, '{{ $produit->nom }}', '{{ $produit->modele ?? '' }}', {{ $produit->marque_id ?? 'null' }}, {{ $produit->categorie_id ?? 'null' }}, '{{ $produit->prix_achat ?? 0 }}', '{{ $produit->prix_vente ?? 0 }}', '{{ $produit->produitUnites->first()->numero_serie ?? '' }}', '{{ $produit->description ?? '' }}')" class="text-blue-600 hover:text-blue-700 mr-2">
                                             <i class="fas fa-edit text-xl"></i>
                                         </button>
-                                        <button class="text-red-600 hover:text-red-700">
-                                            <i class="fas fa-trash text-xl"></i>
-                                        </button>
-                                        {{-- <form action="{{ route('users.destroy', $user->id) }}" method="POST" style="display: inline;">
+                                        <form id="delete-form-{{ $produit->id }}" action="{{ route('produits.suppression', $produit->id)}}" method="POST" style="display:inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="text-red-600 hover:text-red-700" onclick="event.preventDefault(); confirmSuppression({{ $produit->id }}, '{{ $produit->nom }}')">
+                                                <i class="fas fa-trash text-xl"></i>
+                                            </button>
+                                             @if(session('success'))
+                                                <script>
+                                                    setTimeout(function() {
+                                                        Swal.fire({
+                                                            title: "Succès!",
+                                                            text: "{{ session('success') }}",
+                                                            icon: "success",
+                                                            timer: 3000,
+                                                            showConfirmButton: false,
+                                                            showCancelButton: false
+                                                        });
+                                                    }, 500);
+                                                </script>
+                                                @endif
+                                        </form>
+                                        {{-- <form action="" method="POST" style="display: inline;">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="text-red-600 hover:text-red-900" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')">Supprimer</button>
-                                        </form> --}}
+                                        </form>  --}}
                                     </td>
                                 </tr>
                             @empty
@@ -331,6 +349,87 @@
                         </button>
                         <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
                             Enregistrer
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Modification Produit -->
+    <div id="modalModificationProduit" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
+        <div class="relative top-10 mx-auto p-6 border w-[800px] shadow-lg rounded-md bg-white max-h-[150vh] overflow-y-auto">
+            <div class="mt-3">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-bold text-gray-900">Modifier le Produit</h3>
+                    <button onclick="closeModal('modalModificationProduit')" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <form id="editForm" class="space-y-4" method="POST">
+                    @csrf
+                    @method('PUT')
+                    <input type="hidden" id="editProductId" name="id">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nom du produit</label>
+                            <input type="text" id="editNom" name="nom" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Entrez le nom" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Modèle</label>
+                            <input type="text" id="editModele" name="modele" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Entrez le modèle">
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Marque</label>
+                            <select id="editMarqueId" name="marque_id" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                                <option value="">Sélectionner une marque</option>
+                                @foreach ($marques as $marque)
+                                    <option value="{{ $marque->id }}">{{ $marque->nom }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Catégorie</label>
+                            <select id="editCategorieId" name="categorie_id" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                                <option value="">Sélectionner une catégorie</option>
+                                @foreach ($categories as $categorie)
+                                    <option value="{{ $categorie->id }}">{{ $categorie->nom }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Prix d'achat</label>
+                            <input type="number" step="0.01" id="editPrixAchat" name="prix_achat" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Entrez le prix d'achat" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Prix de vente</label>
+                            <input type="number" step="0.01" id="editPrixVente" name="prix_vente" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Entrez le prix de vente" required>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Numéro série</label>
+                            <input type="text" id="editNumeroSerie" name="numero_serie" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Entrez le numéro de série" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                            <textarea id="editDescription" name="description" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" rows="3" placeholder="Entrez la description du produit"></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-end space-x-3 pt-4">
+                        <button type="button" onclick="closeModal('modalModificationProduit')" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
+                            Annuler
+                        </button>
+                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                            Mettre à jour
                         </button>
                     </div>
                 </form>
@@ -450,7 +549,7 @@
         // Fermer les modals en cliquant à l'extérieur
         document.addEventListener('click', function(event) {
             if (event.target.classList.contains('bg-opacity-50')) {
-                const modals = ['modalNouveauProduit', 'modalNouvelleCategorie', 'modalNouvelleMarque'];
+                const modals = ['modalNouveauProduit', 'modalModificationProduit', 'modalNouvelleCategorie', 'modalNouvelleMarque'];
                 modals.forEach(modalId => {
                     const modal = document.getElementById(modalId);
                     if (!modal.classList.contains('hidden')) {
@@ -465,31 +564,86 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('JsBarcode chargé:', typeof JsBarcode);
-    
-    // Générer les codes-barres pour chaque produit
-    @foreach($produits as $produit)
-        @if($produit->produitUnites && $produit->produitUnites->isNotEmpty())
-            <?php $numeroSerie = $produit->produitUnites->first()->numero_serie; ?>
-            console.log('Génération code-barres pour produit {{ $produit->id }}: {{ $numeroSerie }}');
-            
-            try {
-                JsBarcode("#barcode-{{ $produit->id }}", "{{ $numeroSerie }}", {
-                    format: "CODE128",
-                    width: 1.5,      // Plus fin
-                    height: 30,       // Plus court
-                    displayValue: true,
-                    fontSize: 10,     // Texte plus petit
-                    margin: 3         // Marge réduite
-                });
-                console.log('Code-barres généré pour produit {{ $produit->id }}');
-            } catch (error) {
-                console.error('Erreur génération code-barres pour produit {{ $produit->id }}:', error);
+    // Fonction de confirmation avec SweetAlert2
+    function confirmSuppression(produitId, produitNom) {
+        Swal.fire({
+            title: 'Confirmation de suppression',
+            text: `Êtes-vous sûr de vouloir supprimer le produit "${produitNom}" ?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Oui, supprimer',
+            cancelButtonText: 'Annuler',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Soumettre le formulaire de suppression avec l'ID unique
+                const form = document.getElementById(`delete-form-${produitId}`);
+                if (form) {
+                    form.submit();
+                } else {
+                    console.error('Formulaire de suppression non trouvé pour le produit ID:', produitId);
+                    Swal.fire({
+                        title: 'Erreur!',
+                        text: 'Formulaire de suppression non trouvé',
+                        icon: 'error',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                }
             }
-        @endif
-    @endforeach
-});
+        });
+    }
+
+    // Fonction pour ouvrir le modal de modification
+    function openEditModal(id, nom, modele, marqueId, categorieId, prixAchat, prixVente, numeroSerie, description) {
+        // Remplir les champs du formulaire
+        document.getElementById('editProductId').value = id;
+        document.getElementById('editNom').value = nom;
+        document.getElementById('editModele').value = modele;
+        document.getElementById('editMarqueId').value = marqueId || '';
+        document.getElementById('editCategorieId').value = categorieId || '';
+        document.getElementById('editPrixAchat').value = prixAchat;
+        document.getElementById('editPrixVente').value = prixVente;
+        document.getElementById('editNumeroSerie').value = numeroSerie;
+        document.getElementById('editDescription').value = description;
+        
+        // Définir l'action du formulaire
+        document.getElementById('editForm').action = '/produits/modification/' + id;
+        
+        // Ouvrir le modal
+        openModal('modalModificationProduit');
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('JsBarcode chargé:', typeof JsBarcode);
+        
+        // Générer les codes-barres pour chaque produit
+        @foreach($produits as $produit)
+            @if($produit->produitUnites && $produit->produitUnites->isNotEmpty())
+                <?php $numeroSerie = $produit->produitUnites->first()->numero_serie; ?>
+                console.log('Génération code-barres pour produit {{ $produit->id }}: {{ $numeroSerie }}');
+                
+                try {
+                    JsBarcode("#barcode-{{ $produit->id }}", "{{ $numeroSerie }}", {
+                        format: "CODE128",
+                        width: 1.5,      // Plus fin
+                        height: 30,       // Plus court
+                        displayValue: true,
+                        fontSize: 10,     // Texte plus petit
+                        margin: 3         // Marge réduite
+                    });
+                    console.log('Code-barres généré pour produit {{ $produit->id }}');
+                } catch (error) {
+                    console.error('Erreur génération code-barres pour produit {{ $produit->id }}:', error);
+                }
+            @endif
+        @endforeach
+    });
+
+    
 </script>
 @endpush

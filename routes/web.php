@@ -13,11 +13,12 @@ Route::delete('/utilisateur/suppression/{id}', [ApiController::class, 'suppressi
 Route::get('/produits', [ApiController::class, 'listeProduits'])->name('produits');
 Route::get('/historiques', [ApiController::class, 'historiques'])->name('historiques');
 Route::post('/produit/ajout', [ApiController::class, 'ajoutProduit'])->name('produits.ajout');
+Route::put('/produits/modification/{id}', [ApiController::class, 'modificationProduit'])->name('produits.modification');
 Route::get('/parametres', [ApiController::class, 'parametres'])->name('parametres');
 Route::post('/marques/ajout', [ApiController::class, 'ajoutMarque'])->name('marques.ajout');
 Route::post('/categories/ajout', [ApiController::class, 'ajoutCategorie'])->name('categories.ajout');
 Route::get('/vente', [ApiController::class, 'vente'])->name('vente');
 Route::post('/vente/ajout', [ApiController::class, 'ajouterVente'])->name('ventes.ajout');
 Route::get('/rapport-vente', [ApiController::class, 'rapportVente'])->name('rapports');
-
+Route::delete('/suppression/produit/{id}', [ApiController::class, 'suppression_produit'])->name('produits.suppression');
 Route::post('/logout', [ApiController::class, 'logout'])->name('logout');

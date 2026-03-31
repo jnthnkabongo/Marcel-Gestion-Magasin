@@ -499,11 +499,6 @@ class ApiController extends Controller
             return redirect()->route('index')->with('error', 'Vous devez être connecté pour accéder au dashboard');
         }
         $totalProduit = Produit::count();
-        // $totalProduit = DB::table('produits')
-        //     ->join('produit_unites', 'produits.id', '=', 'produit_unites.produit_id')
-        //     //->where('produit_unites.quantite', '>', 0)
-        //     ->select('produits.*', 'produit_unites.numero_serie')
-        //     ->count();
 
         $totalProduitStock = DB::table('produits')
             ->join('produit_unites', 'produits.id', '=', 'produit_unites.produit_id')
@@ -527,6 +522,78 @@ class ApiController extends Controller
         $categories = Categorie::orderBy('nom','asc')->get();
         $marques = Marque::orderBy('nom','asc')->get();
         return view('pages.liste-produit', compact('produits', 'categories', 'marques', 'totalProduit', 'totalProduitStock', 'totalProduitStockVendu'));
+    }
+
+    public function suppression_produit($id){
+        $user = Auth::user();
+        if (!$user) {
+            return redirect()->route('index')->with('error', 'Vous devez être connecté pour acceder au dashboard');
+        }
+        try {
+            $produit = Produit::findOrFail($id);
+            
+            // Supprimer d'abord les unités de produit associées
+            $produit->produitUnites()->delete();
+            
+            //Ajouter l'historique avant la suppression
+            $this->ajouterHistoriqueAction('suppression=produit','suppression', 'Suppression du produit : ' .$produit->nom);
+
+            $produit->delete();
+
+            return redirect()->route('produits')->with('success', 'le produit supprimer avec succes');
+        } catch (\Throwable $e) {
+            return redirect()->route('produits')->with('error', 'Erreur lors de la suppression: ' . $e->getMessage());
+
+        }
+    }
+
+    public function modificationProduit(Request $request, $id){
+        $user = Auth::user();
+        if (!$user) {
+            return redirect()->route('index')->with('error', 'Vous devez être connecté pour accéder au dashboard');
+        }
+        
+        try {
+            $produit = Produit::findOrFail($id);
+            
+            // Valider les données
+            $request->validate([
+                'nom' => 'required|string|max:255',
+                'modele' => 'nullable|string|max:255',
+                'marque_id' => 'required|exists:marques,id',
+                'categorie_id' => 'required|exists:categories,id',
+                'prix_achat' => 'required|numeric|min:0',
+                'prix_vente' => 'required|numeric|min:0',
+                'numero_serie' => 'required|string|max:255',
+                'description' => 'nullable|string'
+            ]);
+            
+            // Mettre à jour les informations du produit
+            $produit->nom = $request->nom;
+            $produit->modele = $request->modele;
+            $produit->marque_id = $request->marque_id;
+            $produit->categorie_id = $request->categorie_id;
+            $produit->prix_achat = $request->prix_achat;
+            $produit->prix_vente = $request->prix_vente;
+            $produit->description = $request->description;
+            
+            $produit->save();
+            
+            // Mettre à jour le numéro de série dans produit_unites si nécessaire
+            if ($produit->produitUnites()->exists()) {
+                $produitUnite = $produit->produitUnites()->first();
+                $produitUnite->numero_serie = $request->numero_serie;
+                $produitUnite->save();
+            }
+            
+            // Ajouter l'historique
+            $this->ajouterHistoriqueAction('modification-produit','modification', 'Modification du produit : ' . $produit->nom);
+            
+            return redirect()->route('produits')->with('success', 'Produit modifié avec succès');
+            
+        } catch (\Throwable $e) {
+            return redirect()->route('produits')->with('error', 'Erreur lors de la modification: ' . $e->getMessage());
+        }
     }
 
     public function AjoutUtilisateur(RegisterRequest $request){
@@ -569,7 +636,7 @@ class ApiController extends Controller
             // Supprimer l'utilisateur
             $user->delete();
             
-            return redirect()->route('utilisateurs')->with('success', 'Utilisateur supprimé avec succès');
+            return redirect()->route('utilisateurs')->with('success', 'Utilisateur supprimer avec succes');
             
         } catch (\Exception $e) {
             return redirect()->route('utilisateurs')->with('error', 'Erreur lors de la suppression: ' . $e->getMessage());
