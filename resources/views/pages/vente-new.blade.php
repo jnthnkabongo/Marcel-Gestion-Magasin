@@ -214,15 +214,16 @@
                                     <button class="text-blue-600 hover:text-blue-700 mr-2" title="Voir les détails">
                                         <i class="fas fa-eye text-xl"></i>
                                     </button>
-                                    <button class="text-green-600 hover:text-green-700 mr-2" title="Imprimer">
-                                        <i class="fas fa-print text-xl"></i>
-                                    </button>
-                                    {{-- <button class="text-yellow-600 hover:text-yellow-700 mr-2" title="Modifier">
+                                    <button onclick="openEditVenteModal({{ $vente->id }}, '{{ $vente->reference }}', '{{ $vente->date_vente }}', '{{ $vente->client->nom_client ?? '' }}', '{{ $vente->statut ?? 'completed' }}')" class="text-green-600 hover:text-green-700 mr-2" title="Modifier">
                                         <i class="fas fa-edit text-xl"></i>
-                                    </button> --}}
-                                    <button class="text-red-600 hover:text-red-700" title="Supprimer">
-                                        <i class="fas fa-trash text-xl"></i>
                                     </button>
+                                    <form id="delete-vente-form-{{ $vente->id }}" action="{{ route('ventes.suppression', $vente->id)}}" method="POST" style="display:inline">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="text-red-600 hover:text-red-700" title="Supprimer" onclick="event.preventDefault(); confirmSuppressionVente({{ $vente->id }}, '{{ $vente->reference }}')">
+                                            <i class="fas fa-trash text-xl"></i>
+                                        </button>
+                                    </form>
                                 </td>
                             </tr>
                         @empty
@@ -345,6 +346,59 @@
     </div>
 </div>
 
+<!-- Modal Modification Vente -->
+<div id="modalModificationVente" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
+    <div class="relative top-10 mx-auto p-6 border w-[900px] shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
+        <div class="mt-3">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-bold text-gray-900">Modifier la Vente</h3>
+                <button onclick="closeModal('modalModificationVente')" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="editVenteForm" class="space-y-4" method="POST">
+                @csrf
+                @method('PUT')
+                <input type="hidden" id="editVenteId" name="id">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Référence</label>
+                        <input type="text" id="editReference" name="reference" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Référence de la vente" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nom du client</label>
+                        <input type="text" id="editNomClient" name="nom_client" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Nom du client">
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Date de vente</label>
+                        <input type="date" id="editDateVente" name="date_vente" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Statut</label>
+                        <select id="editStatut" name="statut" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                            <option value="completed">Complétée</option>
+                            <option value="pending">En attente</option>
+                            <option value="cancelled">Annulée</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="flex justify-end space-x-3 pt-4">
+                    <button type="button" onclick="closeModal('modalModificationVente')" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
+                        Annuler
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
+                        Mettre à jour la vente
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
     // Données des produits
     const produits = @json(isset($liste_produits) ? $liste_produits : []);
@@ -361,6 +415,54 @@
         // Cacher les résultats de recherche
         document.getElementById('searchResults').classList.add('hidden');
         document.getElementById('produitSearch').value = '';
+    }
+
+    // Fonction pour ouvrir le modal de modification de vente
+    function openEditVenteModal(id, reference, dateVente, nomClient, statut) {
+        // Remplir les champs du formulaire
+        document.getElementById('editVenteId').value = id;
+        document.getElementById('editReference').value = reference;
+        document.getElementById('editNomClient').value = nomClient;
+        document.getElementById('editDateVente').value = dateVente;
+        document.getElementById('editStatut').value = statut;
+        
+        // Définir l'action du formulaire
+        document.getElementById('editVenteForm').action = '/ventes/modification/' + id;
+        
+        // Ouvrir le modal
+        openModal('modalModificationVente');
+    }
+
+    // Fonction de confirmation de suppression de vente
+    function confirmSuppressionVente(venteId, venteReference) {
+        Swal.fire({
+            title: 'Confirmation de suppression',
+            text: `Êtes-vous sûr de vouloir supprimer la vente "${venteReference}" ?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Oui, supprimer',
+            cancelButtonText: 'Annuler',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Soumettre le formulaire de suppression avec l'ID unique
+                const form = document.getElementById(`delete-vente-form-${venteId}`);
+                if (form) {
+                    form.submit();
+                } else {
+                    console.error('Formulaire de suppression non trouvé pour la vente ID:', venteId);
+                    Swal.fire({
+                        title: 'Erreur!',
+                        text: 'Formulaire de suppression non trouvé',
+                        icon: 'error',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                }
+            }
+        });
     }
 
     // Gestion des produits dans le formulaire de vente

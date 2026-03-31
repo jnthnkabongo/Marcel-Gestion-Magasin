@@ -19,6 +19,8 @@ Route::post('/marques/ajout', [ApiController::class, 'ajoutMarque'])->name('marq
 Route::post('/categories/ajout', [ApiController::class, 'ajoutCategorie'])->name('categories.ajout');
 Route::get('/vente', [ApiController::class, 'vente'])->name('vente');
 Route::post('/vente/ajout', [ApiController::class, 'ajouterVente'])->name('ventes.ajout');
+Route::put('/ventes/modification/{id}', [ApiController::class, 'modificationVente'])->name('ventes.modification');
+Route::delete('/ventes/suppression/{id}', [ApiController::class, 'suppressionVente'])->name('ventes.suppression');
 Route::get('/rapport-vente', [ApiController::class, 'rapportVente'])->name('rapports');
 Route::delete('/suppression/produit/{id}', [ApiController::class, 'suppression_produit'])->name('produits.suppression');
 Route::post('/logout', [ApiController::class, 'logout'])->name('logout');

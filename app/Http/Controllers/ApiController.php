@@ -912,6 +912,91 @@ class ApiController extends Controller
         }
     }
 
+    public function modificationVente(Request $request, $id)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return redirect()->route('index')->with('error', 'Vous devez être connecté pour accéder au dashboard');
+        }
+        
+        try {
+            $vente = Vente::findOrFail($id);
+            
+            // Valider les données
+            $request->validate([
+                'reference' => 'required|string|max:255',
+                'nom_client' => 'nullable|string|max:255',
+                'date_vente' => 'required|date',
+                'statut' => 'required|in:completed,pending,cancelled'
+            ]);
+            
+            // Mettre à jour les informations de la vente
+            $vente->reference = $request->reference;
+            $vente->date_vente = $request->date_vente;
+            $vente->statut = $request->statut;
+            
+            // Si un nom de client est fourni, mettre à jour ou créer le client
+            if ($request->nom_client) {
+                $client = Client::firstOrCreate(
+                    ['nom_client' => $request->nom_client],
+                    [
+                        'email' => $request->nom_client . '@example.com',
+                        'telephone' => '0000000000',
+                        'adresse' => 'Adresse par défaut'
+                    ]
+                );
+                $vente->client_id = $client->id;
+            }
+            
+            $vente->save();
+            
+            // Ajouter l'historique
+            $this->ajouterHistoriqueAction('modification-vente', 'ventes', 'Modification de la vente: ' . $vente->reference);
+            
+            return redirect()->route('vente')->with('success', 'Vente modifiée avec succès');
+            
+        } catch (\Throwable $e) {
+            return redirect()->route('vente')->with('error', 'Erreur lors de la modification: ' . $e->getMessage());
+        }
+    }
+
+    public function suppressionVente($id)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return redirect()->route('index')->with('error', 'Vous devez être connecté pour accéder au dashboard');
+        }
+        
+        try {
+            $vente = Vente::findOrFail($id);
+            
+            // Récupérer les détails de vente avec les relations chargées
+            $venteDetails = $vente->venteDetails()->with('produitUnite')->get();
+            
+            // Supprimer d'abord les détails de vente
+            $vente->venteDetails()->delete();
+            
+            // Remettre en stock les unités de produit si elles étaient vendues
+            foreach ($venteDetails as $detail) {
+                if ($detail->produitUnite) {
+                    // Mettre à jour le statut de l'unité de produit
+                    $detail->produitUnite->update(['statut' => 'en_stock']);
+                }
+            }
+            
+            // Ajouter l'historique avant la suppression
+            $this->ajouterHistoriqueAction('suppression-vente', 'ventes', 'Suppression de la vente: ' . $vente->reference);
+            
+            // Supprimer la vente
+            $vente->delete();
+            
+            return redirect()->route('vente')->with('success', 'Vente supprimée avec succès');
+            
+        } catch (\Throwable $e) {
+            return redirect()->route('vente')->with('error', 'Erreur lors de la suppression: ' . $e->getMessage());
+        }
+    }
+
     public function create()
     {
         //
