@@ -297,7 +297,8 @@ class ApiController extends Controller
         }
         try {
             $request->validate([
-                'client_id' => 'required|exists:clients,id',  // Changé de users,id à clients,id
+                'client_id' => 'required|exists:users,id',
+                'nom_client' => 'required|string|max:255',
                 'date_vente' => 'required|date',
                 'produits' => 'required|array',
                 'quantites' => 'required|array',
@@ -308,6 +309,7 @@ class ApiController extends Controller
             // Créer la vente
             $vente = new Vente();
             $vente->client_id = $request->client_id;
+            $vente->nom_client = $request->nom_client;
             $vente->user_id = Auth::id();
             $vente->date_vente = $request->date_vente;
             $vente->reference = $request->reference ?? 'VTE-' . date('YmdHis');
@@ -367,58 +369,7 @@ class ApiController extends Controller
             ], 500);
         }
     }
-
-    //Créer ou récupérer un client
-    public function clientOrCreate(Request $request){
-        $user = Auth::user();
-
-        if (!$user) {
-            return response()->json([
-                'message' => 'utilisateur non authentifié'
-            ], 401);
-        }
-        
-        Log::info('Tentative création client avec nom: ' . $request->nom);
-        
-        try {
-            $request->validate([
-                'nom' => 'required|string|max:255'
-            ]);
-
-            // Créer ou récupérer le client
-            $client = Client::firstOrCreate(
-                ['nom_client' => $request->nom],
-                [
-                    'email' => $request->nom . '@example.com',
-                    'telephone' => '0000000000',
-                    'adresse' => 'Adresse par défaut'
-                ]
-            );
-
-            Log::info('Client créé/récupéré avec ID: ' . $client->id . ' et nom: ' . $client->nom_client);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Client créé ou récupéré avec succès',
-                'client' => $client
-            ], 201);
-
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            Log::error('Erreur validation client: ' . json_encode($e->errors()));
-            return response()->json([
-                'success' => false,
-                'message' => 'Erreur de validation',
-                'errors' => $e->errors()
-            ], 422);
-        } catch (\Throwable $th) {
-            Log::error('Erreur client: ' . $th->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => 'Erreur lors de la création du client: ' . $th->getMessage()
-            ], 500);
-        }
-    }
-
+    
     //Deconnexion
     public function logout_api(Request $request){
         $user = Auth::user();

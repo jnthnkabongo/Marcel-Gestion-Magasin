@@ -6,6 +6,7 @@ use App\Http\Controllers\ApiController;
 
 Route::post('/login', [ApiController::class, 'login_api']);
 Route::post('/register', [ApiController::class, 'register_api']);
+Route::get('/test', [ApiController::class, 'testConnection']); // Endpoint de test (sans auth)
 
 Route::middleware('auth:sanctum')->group(function () {
     
@@ -16,5 +17,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/liste-vente', [ApiController::class, 'listeVenteApi']);
     Route::get('/liste-utilisateurs', [ApiController::class, 'getUsersApi']);
     Route::get('liste-roles', [ApiController::class, 'getRolesApi']);
+    Route::post('/client-or-create', [ApiController::class, 'clientOrCreate']);
     Route::post('/vente-produit', [ApiController::class, 'venteProduitApi']);
+    Route::get('/rapport-ventes', [ApiController::class, 'rapportVenteApi']);
 });
